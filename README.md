@@ -2,7 +2,7 @@
 ## 本地环境配置
 ### Mysql服务部署
 
-使用docker命令：sudo docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:latest
+使用docker命令：sudo docker run --restart=always -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:latest
 
 用户名：root
 
