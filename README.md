@@ -8,6 +8,10 @@
 
 密码：123456
 
+#### Mysql基本配置
+
+数据库名：shareNoval
+
 ### Redis服务部署
 
 使用docker命令:sudo docker run --restart=always -p 6379:6379 --name myredis -d redis:latest --requirepass 123456
@@ -16,8 +20,6 @@
 
 密码:123456
 
-## Mysql基本配置
 
-数据库名：shareNoval
 
 
