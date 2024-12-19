@@ -7,17 +7,22 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 @Data
+@TableName("`User`")
 /*
  * 表名：User
- * uid:用户id
- * createTime:账号创建时间
- * pwd:用户密码
- * uname:用户名
+ * @param uid 用户id
+ * @param createTime 账号创建时间
+ * @param pwd 用户密码
+ * @param uname 用户名
  */
-@TableName("`User`")
 public class User {
-    private int uid;
+    private Integer uid;
     private LocalDateTime createTime;
     private String pwd;
     private String uname;
+    public User(String uname,String pwd){
+        this.uname = uname;
+        this.pwd = pwd;
+        this.createTime = LocalDateTime.now();
+    }
 }

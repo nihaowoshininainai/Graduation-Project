@@ -1,24 +1,14 @@
 package com.share.noval.mapper;
 
-import javax.sql.DataSource;
-
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
+import com.share.noval.NovalApplication;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,classes = {
-    DataSourceAutoConfiguration.class,
-    MybatisPlusAutoConfiguration.class,
-    DataSource.class,
-    SqlSessionFactory.class
-})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,classes = NovalApplication.class)
 @MapperScan(basePackageClasses = UserMapper.class)
-//UserMapper的测试类
 public class UserMapperTest {
     
     @Autowired
