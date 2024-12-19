@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
     SqlSessionFactory.class
 })
 @MapperScan(basePackageClasses = UserMapper.class)
+//UserMapper的测试类
 public class UserMapperTest {
     
     @Autowired
