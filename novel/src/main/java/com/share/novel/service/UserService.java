@@ -1,7 +1,7 @@
-package com.share.noval.service;
+package com.share.novel.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.share.noval.base.User;
+import com.share.novel.base.User;
 
 public interface UserService extends IService<User>{
 

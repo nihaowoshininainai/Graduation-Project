@@ -1,4 +1,4 @@
-package com.share.noval.base;
+package com.share.novel.base;
 
 import java.time.LocalDateTime;
 

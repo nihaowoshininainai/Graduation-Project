@@ -1,4 +1,4 @@
-package com.share.noval;
+package com.share.novel;
 
 import java.sql.SQLException;
 
@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @SpringBootTest
-class NovalApplicationTests {
+class NovelApplicationTests {
 
 	@Test
 	void contextLoads() {

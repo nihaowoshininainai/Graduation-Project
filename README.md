@@ -10,7 +10,14 @@
 
 #### Mysql基本配置
 
-- - 数据库名：shareNoval
+- - 建表命令：
+CREATE TABLE User(  
+    uid int NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT '用户id',
+    create_time DATETIME COMMENT '注册时间',
+    uname VARCHAR(255) UNIQUE COMMENT '用户名',
+    pwd VARCHAR(255) COMMENT '用户密码'
+) COMMENT '用户表';
+- - 数据库名：shareNovel
 - - 表：
 - - - 用户表(User)：![用户表](./img/241219_20h09m09s_screenshot.png "用户表")
 

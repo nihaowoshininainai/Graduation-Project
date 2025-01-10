@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.share</groupId>
-	<artifactId>noval</artifactId>
+	<artifactId>novel</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>noval</name>
-	<description>Demo project for Spring Boot</description>
+	<name>novel</name>
+	<description>a web for share novel</description>
 	<url/>
 	<licenses>
 		<license/>

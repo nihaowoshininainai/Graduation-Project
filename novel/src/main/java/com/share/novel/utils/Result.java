@@ -1,4 +1,4 @@
-package com.share.noval.utils;
+package com.share.novel.utils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

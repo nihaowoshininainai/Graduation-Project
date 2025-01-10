@@ -1,12 +1,12 @@
-package com.share.noval.controller;
+package com.share.novel.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.share.noval.base.User;
-import com.share.noval.service.UserService;
-import com.share.noval.utils.Result;
+import com.share.novel.base.User;
+import com.share.novel.service.UserService;
+import com.share.novel.utils.Result;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
