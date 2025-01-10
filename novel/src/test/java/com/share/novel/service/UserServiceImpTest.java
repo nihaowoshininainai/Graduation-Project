@@ -1,4 +1,4 @@
-package com.share.noval.service;
+package com.share.novel.service;
 
 
 import org.junit.jupiter.api.Test;
@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.share.noval.NovalApplication;
-import com.share.noval.base.User;
+import com.share.novel.NovelApplication;
+import com.share.novel.base.User;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,classes = NovalApplication.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE,classes = NovelApplication.class)
 public class UserServiceImpTest {
     @Autowired
     private UserService userService;
