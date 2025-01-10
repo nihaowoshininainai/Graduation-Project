@@ -6,14 +6,14 @@ import java.util.Map;
 import cn.hutool.json.JSONUtil;
 
 //固定用来传输给前端的格式
-/*
- * @param message 说明文字
- * @param result 请求数据的结果
- */
-
 public class Result {
 
     //请求成功
+    /*
+     * @param message 说明文字
+     * @param data 需要JSON格式化的数据
+     * @returns result 请求数据的结果
+     */
     public static String success(String message,Object data) {
         Map<String, String> result = new LinkedHashMap<>();
         result.put("state", "1");
@@ -23,6 +23,11 @@ public class Result {
     }
 
     //请求失败
+    /*
+     * @param message 说明文字
+     * @param data 需要JSON格式化的数据
+     * @returns result 请求数据的结果
+     */
     public static String error(String message,Object data){
         Map<String, String> result = new LinkedHashMap<>();
         result.put("state", "0");
