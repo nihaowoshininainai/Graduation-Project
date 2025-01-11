@@ -46,6 +46,10 @@ public class UserController {
         if(flag){
             User user = userService.getOne(isSame);
             Map<String,Object> payload = new HashMap<>();
+
+            //设置token不存敏感信息
+            user.setPwd(" ");
+            
             payload.put("user", user);
 
             //加密
