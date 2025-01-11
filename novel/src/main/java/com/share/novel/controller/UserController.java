@@ -43,7 +43,7 @@ public class UserController {
         String token = JWTUtil.createToken(payload, stringRedisTemplate.opsForValue().get("secretkey").getBytes());
 
         //生成的token存入redis
-        stringRedisTemplate.opsForValue().set("token:"+token, "true", 1, TimeUnit.DAYS);
+        stringRedisTemplate.opsForValue().set("token:"+user.getUname()+":"+token, "true", 1, TimeUnit.DAYS);
 
         return token;
     }
