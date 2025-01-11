@@ -52,7 +52,7 @@ public class UserController {
             String token = JWTUtil.createToken(payload, stringRedisTemplate.opsForValue().get("secretkey").getBytes());
 
             //将token存入redis中,设置过期时间为一天
-            stringRedisTemplate.opsForValue().set("token", token, 1, TimeUnit.DAYS);
+            stringRedisTemplate.opsForValue().set("token:"+token, "true", 1, TimeUnit.DAYS);
 
             return Result.success("注册成功", token);
         }
