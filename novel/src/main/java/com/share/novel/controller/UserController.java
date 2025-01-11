@@ -28,6 +28,26 @@ public class UserController {
     @Autowired
     StringRedisTemplate stringRedisTemplate;
 
+    //一个通用User生成token方法
+    String getToken(User user){
+        Map<String,Object> payload = new HashMap<>();
+
+        //设置token不存敏感信息
+        user.setPwd(" ");
+
+        payload.put("user", user);
+
+        //添加此负载为了使相同用户多次登陆有不同jwt，提高安全性
+        payload.put("change", System.currentTimeMillis());
+
+        String token = JWTUtil.createToken(payload, stringRedisTemplate.opsForValue().get("secretkey").getBytes());
+
+        //生成的token存入redis
+        stringRedisTemplate.opsForValue().set("token:"+token, "true", 1, TimeUnit.DAYS);
+
+        return token;
+    }
+
     //注册
     @PostMapping("/register")
     public String register(String uname,String pwd) {
@@ -45,22 +65,29 @@ public class UserController {
         boolean flag = userService.save(new User(uname, pwd));
         if(flag){
             User user = userService.getOne(isSame);
-            Map<String,Object> payload = new HashMap<>();
-
-            //设置token不存敏感信息
-            user.setPwd(" ");
-            
-            payload.put("user", user);
-
-            //加密
-            String token = JWTUtil.createToken(payload, stringRedisTemplate.opsForValue().get("secretkey").getBytes());
-
-            //将token存入redis中,设置过期时间为一天
-            stringRedisTemplate.opsForValue().set("token:"+token, "true", 1, TimeUnit.DAYS);
+            String token = getToken(user);
 
             return Result.success("注册成功", token);
         }
         return Result.error("注册用户失败，请重试", null);
+    }
+
+    //登陆
+    @PostMapping("/login")
+    public String login(String uname,String pwd){
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uname", uname);
+        queryWrapper.eq("pwd", pwd);
+        User user = userService.getOne(queryWrapper);
+
+        if(user!=null){
+            String token = getToken(user);
+            
+            return Result.success("登陆成功", token);
+        }
+        else
+            return Result.error("登陆失败", null);
     }
     
 }
