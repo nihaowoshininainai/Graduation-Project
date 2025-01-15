@@ -111,7 +111,7 @@ public class UserController {
     
     //修改密码
     @PostMapping("/resetPwd")
-    public String resetPwd(HttpServletRequest httpServletRequest,String newPwd) {
+    public String resetPwd(HttpServletRequest httpServletRequest,String newPwd,String oldPwd) {
         Map<String,String> cookie = strToMap(httpServletRequest.getHeader("Cookie"));
         String token = cookie.get("Token");
         
@@ -119,25 +119,34 @@ public class UserController {
         boolean flag = JWTUtil.verify(token, key.getBytes());
 
         if(flag){
-            //查找redis中是否有该token
             User user = JSONUtil.toBean(JWTUtil.parseToken(token).getPayload("user").toString(), User.class);
             String uname = user.getUname();
-            String exist = stringRedisTemplate.opsForValue().get("token:"+uname+":"+token);
-            if(exist!=null){
-                //删除所有旧密码的token
-                stringRedisTemplate.delete(stringRedisTemplate.keys("token:"+uname+":*"));
 
-                //将新密码存入mysql
-                user.setPwd(newPwd);
-                userService.updateById(user);
+            //验证旧密码正确性
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("uname", uname);
+            queryWrapper.eq("pwd", oldPwd);
+            User userOne = userService.getOne(queryWrapper);
+            if(userOne!=null){
+                //查找redis中是否有该token
+                String exist = stringRedisTemplate.opsForValue().get("token:"+uname+":"+token);
+                if(exist!=null){
+                    //删除所有旧密码的token
+                    stringRedisTemplate.delete(stringRedisTemplate.keys("token:"+uname+":*"));
 
-                user.setPwd(" ");
-                String newToken = getToken(user);
-                return Result.success("修改成功", newToken);
+                    //将新密码存入mysql
+                    user.setPwd(newPwd);
+                    userService.updateById(user);
+
+                    user.setPwd(" ");
+                    String newToken = getToken(user);
+                    return Result.success("修改成功", newToken);
+                }
+                else
+                    return Result.error("token已过期，请重新登陆", null);
             }
             else
-                return Result.error("token已过期，请重新登陆", null);
-
+                return Result.error("密码错误", null);
         }
         else
             return Result.error("非合法token", null);
