@@ -150,7 +150,45 @@ public class UserController {
         }
         else
             return Result.error("非合法token", null);
+    }
+
+    //注销功能
+    @PostMapping("/deleteUser")
+    public String deleteUser(HttpServletRequest httpServletRequest,String pwd){
+        Map<String,String> cookie = strToMap(httpServletRequest.getHeader("Cookie"));
+        String token = cookie.get("Token");
         
+        //判断token合法性
+        boolean flag = JWTUtil.verify(token, key.getBytes());
         
+        if(flag){
+            User user = JSONUtil.toBean(JWTUtil.parseToken(token).getPayload("user").toString(), User.class);
+            String uname = user.getUname();
+
+            //验证密码正确性
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("uname", uname);
+            queryWrapper.eq("pwd", pwd);
+            User userOne = userService.getOne(queryWrapper); 
+            if(userOne!=null){
+                //查找redis中是否有该token
+                String exist = stringRedisTemplate.opsForValue().get("token:"+uname+":"+token);
+                if(exist!=null){
+                    //删除所有关于该用户的token
+                    stringRedisTemplate.delete(stringRedisTemplate.keys("token:"+uname+":*"));
+
+                    //将用户从mysql删除
+                    userService.removeById(user);
+
+                    return Result.success("已成功注销", null);
+                }
+                else
+                    return Result.error("token已过期，请重新登陆", null);
+            }
+            else
+                return Result.error("密码错误", null);
+        }
+        else
+            return Result.error("非合法token", null);           
     }
 }
