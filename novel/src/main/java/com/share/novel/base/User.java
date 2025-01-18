@@ -27,6 +27,7 @@ public class User {
     private String createTime;
     private String pwd;
     private String uname;
+    public User(){}
     public User(String uname,String pwd){
         this.uname = uname;
         this.pwd = pwd;
