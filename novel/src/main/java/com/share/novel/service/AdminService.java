@@ -12,6 +12,6 @@ public interface AdminService extends IService<Admin> {
     String addAdmin(String aname,String pwd, Admin admin);
 
     //删除管理员
-    String delAdmin(Integer aid,String pwd);
+    String delAdmin(String aname,String pwd, Admin admin);
 
 }

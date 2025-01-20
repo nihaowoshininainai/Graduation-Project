@@ -58,11 +58,22 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper,Admin> implements 
 	}
 
 	@Override
-	public String delAdmin(Integer aid, String pwd) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'delAdmin'");
-	}
+	public String delAdmin(String aname,String pwd, Admin admin) {
+		if(!aname.equals("admin"))
+            return Result.error("非最高管理员账户，不可删除", "");
+        if(admin.getPwd()==null||admin.getPwd().equals(""))
+            return Result.error("密码不可为空", "");
+        QueryWrapper<Admin> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("aname", aname);
+        queryWrapper.eq("pwd", pwd);
+        boolean flag = adminMapper.exists(queryWrapper);
+        if(!flag)
+            return Result.error("密码错误", "");
+        int d = adminMapper.deleteById(admin);
+        if(d>0)
+            return Result.success("成功移除管理员", "");
+        return Result.error("移除失败，请重试", "");
 
-    
+    }
 
 }
