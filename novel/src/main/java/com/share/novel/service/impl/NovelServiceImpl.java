@@ -1,0 +1,60 @@
+package com.share.novel.service.impl;
+
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.share.novel.base.Novel;
+import com.share.novel.mapper.NovelMapper;
+import com.share.novel.service.NovelService;
+import com.share.novel.utils.Result;
+
+@Service
+public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements NovelService {
+
+    @Autowired
+    NovelMapper novelMapper;
+
+    @Override
+    public String add(Novel novel) {
+        int a = novelMapper.insert(novel);
+        if(a>0)
+            return Result.success("添加成功", "");
+        return Result.error("添加失败，请重试", "");
+    }
+
+    @Override
+    public String del(Novel novel) {
+        int a = novelMapper.deleteById(novel);
+        if(a>0)
+            return Result.success("删除成功", "");
+        return Result.error("删除失败，请重试", "");
+    }
+
+    @Override
+    public String index(String condition,String sort,Integer current,Integer size) {
+        QueryWrapper<Novel> queryWrapper = new QueryWrapper<>();
+        String orderBy = new String();
+        if (condition==Condition.hot.name())
+            orderBy = "views";
+        else
+            orderBy = "create_time";
+        if(sort==Sort.desc.name()){
+            queryWrapper.orderByDesc(orderBy);
+        }
+        else
+            queryWrapper.orderByAsc(orderBy);
+        Page<Novel> page = new Page<>(current,size);
+        IPage<Novel> iPage = novelMapper.selectPage(page, queryWrapper);
+        Map<String,Object> map = Map.of("pages",iPage.getPages(),"novels",iPage.getRecords());
+        
+
+        return Result.success("查询成功", map);
+    }
+
+}
