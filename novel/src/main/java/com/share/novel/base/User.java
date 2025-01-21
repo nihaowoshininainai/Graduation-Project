@@ -33,6 +33,8 @@ public class User {
         this.pwd = pwd;
         this.createTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
+
+    @Override
     public String toString(){
         Map<String,String> map = new HashMap<>();
         map.put("uid", uid.toString());
