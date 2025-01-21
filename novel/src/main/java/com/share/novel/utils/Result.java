@@ -1,7 +1,7 @@
 package com.share.novel.utils;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import cn.hutool.json.JSONUtil;
 
@@ -15,10 +15,10 @@ public class Result {
      * @returns result 请求数据的结果
      */
     public static String success(String message,Object data) {
-        Map<String, String> result = new LinkedHashMap<>();
+        Map<String, Object> result = new TreeMap<>();
         result.put("state", "1");
         result.put("message", message);
-        result.put("data", data.toString());
+        result.put("data", data);
         return JSONUtil.toJsonStr(result);
     }
 
@@ -29,13 +29,13 @@ public class Result {
      * @returns result 请求数据的结果
      */
     public static String error(String message,Object data){
-        Map<String, String> result = new LinkedHashMap<>();
+        Map<String, Object> result = new TreeMap<>();
         result.put("state", "0");
         result.put("message", message);
         if(data==null)
             result.put("data", "null");
         else
-            result.put("data", data.toString());
+            result.put("data", data);
         return JSONUtil.toJsonStr(result);        
     }
 }
