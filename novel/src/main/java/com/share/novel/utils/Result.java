@@ -1,8 +1,11 @@
 package com.share.novel.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 
 //固定用来传输给前端的格式
@@ -37,5 +40,20 @@ public class Result {
         else
             result.put("data", data);
         return JSONUtil.toJsonStr(result);        
+    }
+
+    /*
+     * 将json字符串中属性提取出来，存入list传出
+     */
+    public static List<String> jsonStrtoList(String jsonStr){
+        JSONObject jsonObject = JSONUtil.parseObj(jsonStr);
+        String state = jsonObject.getStr("state");
+        String message = jsonObject.getStr("message");
+        String data = jsonObject.getStr("data");
+        List<String> list = new ArrayList<>();
+        list.add(state);
+        list.add(message);
+        list.add(data);
+        return list;
     }
 }
