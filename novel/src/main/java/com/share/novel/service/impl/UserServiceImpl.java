@@ -124,7 +124,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         //验证密码正确性
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("uid", uid);
-        queryWrapper.eq("pwd", "pwd");
+        queryWrapper.eq("pwd", pwd);
         boolean flag = userMapper.exists(queryWrapper);
 
         if(flag){
