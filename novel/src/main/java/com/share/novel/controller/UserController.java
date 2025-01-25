@@ -77,6 +77,9 @@ public class UserController {
     
                 //删除所有该用户的token
                 stringRedisTemplate.delete(stringRedisTemplate.keys("token:"+uid+":*"));
+
+                //删除用户查询小说的缓存
+                stringRedisTemplate.delete(stringRedisTemplate.keys("show:"+uid+":*"));
     
             return result;
         };
