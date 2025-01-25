@@ -20,6 +20,7 @@ import lombok.Data;
  * @param createTime 账号创建时间
  * @param pwd 用户密码
  * @param uname 用户名
+ * @param banned 封禁状态，0是正常，1是封禁
  */
 public class User {
     @TableId(type = IdType.AUTO)
@@ -27,6 +28,7 @@ public class User {
     private String createTime;
     private String pwd;
     private String uname;
+    private Integer banned;
     public User(){}
     public User(String uname,String pwd){
         this.uname = uname;
