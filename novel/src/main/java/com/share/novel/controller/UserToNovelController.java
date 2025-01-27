@@ -76,7 +76,7 @@ public class UserToNovelController {
                     result = novelService.add(novel);
 
                     //删除用户查询小说的缓存
-                    stringRedisTemplate.delete(stringRedisTemplate.keys(nu+uid+":*"));
+                    stringRedisTemplate.delete(stringRedisTemplate.keys(nu+uid+"*"));
 
                 }
             }
@@ -107,10 +107,7 @@ public class UserToNovelController {
                 result = novelService.del(novel);
 
                 //删除用户查询小说的缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys("show:"+"user:"+uid+":*"));
-                            
-                //删除相关小说缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys("show:novels:*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(nu+uid+"*"));
 
             }
             else
