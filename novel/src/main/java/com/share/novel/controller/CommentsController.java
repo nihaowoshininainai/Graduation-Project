@@ -3,6 +3,7 @@ package com.share.novel.controller;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,9 @@ public class CommentsController {
     @Autowired
     StringRedisTemplate stringRedisTemplate;
 
+    @Value("${comments.nid.uid}")
+    String cnu;
+
     //添加评论
     @PostMapping("/addCom")
     public String add(HttpServletRequest httpServletRequest,@RequestBody Comments comments){
@@ -38,7 +42,7 @@ public class CommentsController {
             if(flag){
                 
                 //删除评论缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys("comments:"+comments.getNid()+":*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(cnu+comments.getNid()+"*"));
 
                 return Result.success("评论成功", "");
             }
@@ -58,7 +62,7 @@ public class CommentsController {
             if(flag){
 
                 //删除评论缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys("comments:"+comments.getNid()+":*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(cnu+comments.getNid()+":*"));
 
                 return Result.success("评论删除成功", "");
             }

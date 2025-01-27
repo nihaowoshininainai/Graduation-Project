@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,9 @@ public class UserToCollectionController {
     @Autowired
     ControllerUtil controllerUtil;
 
+    @Value("${collection.uid.nid}")
+    String cun;
+
     //添加收藏
     @PostMapping("/addCol")
     public String addCol(HttpServletRequest httpServletRequest,@RequestBody Novel novel){
@@ -42,7 +46,7 @@ public class UserToCollectionController {
             if(flag){
                 
                 //删除查找该用户的收藏缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys("collection:"+uid+":*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(cun+uid+"*"));
 
                 return Result.success("成功收藏", "");
             }
@@ -66,7 +70,7 @@ public class UserToCollectionController {
             if(flag){
                 
                 //删除查找该用户的收藏缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys("collection:"+uid+":*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(cun+uid+"*"));
 
                 return Result.success("取消收藏", "");
             }

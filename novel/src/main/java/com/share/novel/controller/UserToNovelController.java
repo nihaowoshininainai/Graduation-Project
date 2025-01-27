@@ -3,6 +3,7 @@ package com.share.novel.controller;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +43,9 @@ public class UserToNovelController {
     @Autowired
     StringRedisTemplate stringRedisTemplate;
 
+    @Value("${novel.uid}")
+    String nu;
+
     //用户添加文章
     @PostMapping("/addNovel")
     public String addNovel(HttpServletRequest httpServletRequest,@RequestBody UserToNovel userToNovel){
@@ -72,7 +76,8 @@ public class UserToNovelController {
                     result = novelService.add(novel);
 
                     //删除用户查询小说的缓存
-                    stringRedisTemplate.delete(stringRedisTemplate.keys("show:"+uid+":*"));
+                    stringRedisTemplate.delete(stringRedisTemplate.keys(nu+uid+":*"));
+
                 }
             }
             else
@@ -102,7 +107,11 @@ public class UserToNovelController {
                 result = novelService.del(novel);
 
                 //删除用户查询小说的缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys("show:"+uid+":*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys("show:"+"user:"+uid+":*"));
+                            
+                //删除相关小说缓存
+                stringRedisTemplate.delete(stringRedisTemplate.keys("show:novels:*"));
+
             }
             else
                 result = Result.error("密码错误", "");

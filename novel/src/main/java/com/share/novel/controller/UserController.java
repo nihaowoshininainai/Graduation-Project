@@ -36,6 +36,9 @@ public class UserController {
     @Value("${jwt.key}")
     String key;
 
+    @Value("${token.uid}")
+    String tu;
+
     //注册
     @PostMapping("/register")
     public String register(String uname,String pwd) {
@@ -58,7 +61,7 @@ public class UserController {
             if(state.equals("1"))
 
                 //删除所有旧密码的token
-                stringRedisTemplate.delete(stringRedisTemplate.keys("token:"+uid+":*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(tu+uid+"*"));
 
             return result;
         };
@@ -76,10 +79,7 @@ public class UserController {
             if(stateIf.equals("1"))
     
                 //删除所有该用户的token
-                stringRedisTemplate.delete(stringRedisTemplate.keys("token:"+uid+":*"));
-
-                //删除用户查询小说的缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys("show:"+uid+":*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(tu+uid+"*"));
     
             return result;
         };

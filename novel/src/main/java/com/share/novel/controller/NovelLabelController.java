@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +31,9 @@ public class NovelLabelController {
     @Autowired
     ControllerUtil controllerUtil;
 
+    @Value("${novellabel.nid.lid}")
+    String nnl;
+
     //添加标签
     @PostMapping("/addLabel")
     public String add(HttpServletRequest httpServletRequest,@RequestBody List<NovelLabel> novelLabels){
@@ -39,7 +43,7 @@ public class NovelLabelController {
             if(flag){
 
                 //删除小说标签缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys("novelLabel:"+nid+":*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(nnl+nid+"*"));
 
                 return Result.success("添加标签成功", "");
             }
@@ -60,7 +64,7 @@ public class NovelLabelController {
             if(flag){
 
                 //删除小说标签缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys("novelLabel:"+nid+":*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(nnl+nid+"*"));
 
                 return Result.success("移除标签成功", "");
             }

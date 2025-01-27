@@ -8,7 +8,6 @@ import com.share.novel.service.AdminService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -20,9 +19,6 @@ public class AdminController {
 
     @Autowired
     AdminService adminService;
-
-    @Autowired
-    StringRedisTemplate stringRedisTemplate;
 
     //登陆
     @PostMapping("/alogin")

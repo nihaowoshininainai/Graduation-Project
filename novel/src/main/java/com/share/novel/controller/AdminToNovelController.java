@@ -1,6 +1,9 @@
 package com.share.novel.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,13 +26,23 @@ public class AdminToNovelController {
     @Autowired
     AdminService adminService;
 
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
+
+    @Value("${novel.id}")
+    String ni;
+
+    @Value("${novel.uid}")
+    String nu;
+
     @Data
     static class AdminToNovel {
         private Admin admin;
         private Novel novel;  
     }
 
-    //审核统一接口
+    //审核小说统一接口
+    @PostMapping("/auditNovel")
     public String audit(@RequestBody AdminToNovel adminToNovel){
         Admin admin = adminToNovel.getAdmin();
         Novel novel = adminToNovel.getNovel();
@@ -41,9 +54,15 @@ public class AdminToNovelController {
         boolean flag = adminService.exists(lambdaQueryWrapper);
 
         if(flag){
-            boolean uflag = novelService.updateById(novel);
-            if(uflag)
+            boolean nflag = novelService.updateById(novel);
+            if(nflag){
+                
+                //删除相关小说缓存
+                stringRedisTemplate.delete(stringRedisTemplate.keys(ni+novel.getId()+"*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(nu+novel.getUid()+"*"));
+
                 return "操作成功";
+            }
             else 
                 return "操作失败，请重试";
         }
