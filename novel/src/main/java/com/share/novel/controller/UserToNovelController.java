@@ -120,6 +120,7 @@ public class UserToNovelController {
     }
 
     //用户举报小说
+    @PostMapping("/reportNovel")
     public String reportNovel(HttpServletRequest httpServletRequest,@RequestBody Novel novel){
         Function<Integer,String> function = uid -> {
             novel.setState(2);

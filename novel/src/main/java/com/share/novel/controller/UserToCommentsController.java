@@ -3,6 +3,7 @@ package com.share.novel.controller;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +25,7 @@ public class UserToCommentsController {
     ControllerUtil controllerUtil;
 
     //用户举报评论
+    @PostMapping("/reportComments")
     public String reportComments(HttpServletRequest httpServletRequest,Comments comments){
         Function<Integer,String> function = uid -> {
             comments.setState(1);
