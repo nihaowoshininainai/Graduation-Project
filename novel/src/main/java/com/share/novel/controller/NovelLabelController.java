@@ -56,7 +56,7 @@ public class NovelLabelController {
     }
 
     //删除标签
-    @PostMapping("delLabel")
+    @PostMapping("/delLabel")
     public String del(HttpServletRequest httpServletRequest,@RequestBody List<NovelLabel> novelLabels){
         Function<Integer,String> function = uid -> {
             boolean flag = novelLabelService.removeBatchByIds(novelLabels);
