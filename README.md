@@ -75,3 +75,187 @@
 - - - - state 状态值（1为成功，0为失败）
 - - - - message 说明信息
 - - - - data token令牌/null
+
+- - 管理员登陆
+- - - 路径：/alogin
+- - - 方法：post
+- - - 参数：
+- - - - aname:string 管理员名
+- - - - pwd:string 管理员密码
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data 管理员名
+
+- - 添加管理员
+- - - 路径：/addAdmin
+- - - 方法：post
+- - - 参数：
+- - - - admins:Admin[] 第一个admin为发起请求的管理员 第二个admin为添加的管理员
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 删除管理员
+- - - 路径：/delAdmin
+- - - 方法：post
+- - - 参数：
+- - - - admins:Admin[] 第一个admin为发起请求的管理员 第二个admin为删除的管理员，单个admin必须包含aname,pwd字段
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 管理员审核评论
+- - - 路径：/auditComments
+- - - 方法：post
+- - - 参数：
+- - - - admin:Admin 审核评论的管理员必须包含aname,pwd字段
+- - - - comments:Comments 被审核的评论必须包含aid,state,其中state 0为正常，-1为封禁
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 管理员审核小说
+- - - 路径：/auditNovel
+- - - 方法：post
+- - - 参数：
+- - - - admin:Admin 审核评论的管理员必须包含aname,pwd字段
+- - - - novel:Novel 被审核的小说必须包含id，state,其中state -1审核不通过 1审核通过 3管理员核实违规下架处理
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 管理员审核用户
+- - - 路径：/auditUser
+- - - 方法：post
+- - - 参数：
+- - - - admin:Admin 审核评论的管理员必须包含aname,pwd字段
+- - - - user:User 被审核的用户必须包含uid，state,其中state 0是正常 1是封禁
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 添加评论
+- - - 路径：/addCom
+- - - 方法：post
+- - - 参数：
+- - - - comments:Comments 必须包含content,nid
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 删除评论
+- - - 路径：/delCom
+- - - 方法：post
+- - - 参数：
+- - - - comments:Comments 必须包含id
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 评论点赞
+- - - 路径：/addCommentsLike
+- - - 方法：post
+- - - 参数：
+- - - - commentsLike:CommentsLike 必须包含cid
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 评论取消点赞
+- - - 路径：/delCommentsLike
+- - - 方法：post
+- - - 参数：
+- - - - commentsLike:CommentsLike 必须包含cid
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+ 
+- - 小说添加标签
+- - - 路径：/addLabel
+- - - 方法：post
+- - - 参数：
+- - - - novelLabels:NovelLabel[] 单个novelLabel必须包含nid,lid
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - - 小说删除标签
+- - - 路径：/delLabel
+- - - 方法：post
+- - - 参数：
+- - - - novelLabels:NovelLabel[] 单个novelLabel必须包含nid,lid
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 用户添加收藏
+- - - 路径：/addCol
+- - - 方法：post
+- - - 参数：
+- - - - novel:Novel 必须包含id
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 用户取消收藏
+- - - 路径：/delCol
+- - - 方法：post
+- - - 参数：
+- - - - novel:Novel 必须包含id
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 用户举报评论
+- - - 路径：/reportComments
+- - - 方法：post
+- - - 参数：
+- - - - comments:Comments 必须包含id
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 用户添加小说
+- - - 路径：/addNovel
+- - - 方法：post
+- - - 参数：
+- - - - novel:Novel  必须包含title,content
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 用户删除小说
+- - - 路径：/delNovel
+- - - 方法：post
+- - - 参数：
+- - - - novel:Novel  必须包含id
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
+
+- - 用户举报小说
+- - - 路径：/reportNovel
+- - - 方法：post
+- - - 参数：
+- - - - novel:Novel  必须包含id
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data null
