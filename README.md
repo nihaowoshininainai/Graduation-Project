@@ -259,3 +259,26 @@
 - - - - state 状态值（1为成功，0为失败）
 - - - - message 说明信息
 - - - - data null
+
+- - 获取首页小说信息
+- - - 路径：/index
+- - - 方法：get
+- - - 参数：
+- - - - current:number
+- - - - size:number
+- - - - condition:Condition 枚举类：time,hot
+- - - - sort:Sort 枚举类：asc,desc
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data uname:string
+
+- - 获取用户名
+- - - 路径：/showUname
+- - - 方法：get
+- - - 参数：
+- - - - id:number
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data uname:string
