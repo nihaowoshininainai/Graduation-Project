@@ -1,17 +1,22 @@
 package com.share.novel.service.impl;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.share.novel.base.Novel;
 import com.share.novel.mapper.NovelMapper;
 import com.share.novel.service.NovelService;
+import com.share.novel.utils.RandomUtil;
 import com.share.novel.utils.Result;
 
 @Service
@@ -19,6 +24,12 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
 
     @Autowired
     NovelMapper novelMapper;
+
+    @Value("${show.novels.content.sort.current.size}")
+    String sncscs;
+
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
 
     @Override
     public String add(Novel novel) {
@@ -38,23 +49,33 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
 
     @Override
     public String index(String condition,String sort,Integer current,Integer size) {
-        QueryWrapper<Novel> queryWrapper = new QueryWrapper<>();
-        String orderBy = new String();
-        if (condition==Condition.hot.name())
-            orderBy = "views";
-        else
-            orderBy = "create_time";
-        if(sort==Sort.desc.name()){
-            queryWrapper.orderByDesc(orderBy);
-        }
-        else
-            queryWrapper.orderByAsc(orderBy);
-        Page<Novel> page = new Page<>(current,size);
-        IPage<Novel> iPage = novelMapper.selectPage(page, queryWrapper);
-        Map<String,Object> map = Map.of("pages",iPage.getPages(),"novels",iPage.getRecords());
+
+        //先在redis中查询
+        String key = sncscs+condition+":"+sort+":"+current+":"+size;
+        String result = stringRedisTemplate.opsForValue().get(key);
+
+        if(result==null){
+            LambdaQueryWrapper<Novel> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Novel::getState, 1);
+            SFunction<Novel, ?> orderBy = null;
+            if (condition==Condition.hot.name())
+                orderBy = Novel::getViews;
+            else
+                orderBy = Novel::getCreateTime;
+            if(sort==Sort.desc.name()){
+                queryWrapper.orderByDesc(orderBy);
+            }
+            else
+                queryWrapper.orderByAsc(orderBy);
+            Page<Novel> page = new Page<>(current,size);
+            IPage<Novel> iPage = novelMapper.selectPage(page, queryWrapper);
+            Map<String,Object> map = Map.of("pages",iPage.getPages(),"novels",iPage.getRecords());
+            result = Result.success("查找成功", map);
+            stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        }   
         
 
-        return Result.success("查询成功", map);
+        return result;
     }
 
 }
