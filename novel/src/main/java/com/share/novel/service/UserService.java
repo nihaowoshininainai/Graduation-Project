@@ -27,4 +27,7 @@ public interface UserService extends IService<User>{
     //注销功能
     String deleteUser(Integer uid,String pwd);
 
+    //根据id查询用户名
+    String getUname(Integer id);
+
 }

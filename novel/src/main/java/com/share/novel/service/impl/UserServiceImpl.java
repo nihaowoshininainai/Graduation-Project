@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.share.novel.base.User;
 import com.share.novel.mapper.UserMapper;
 import com.share.novel.service.UserService;
+import com.share.novel.utils.RandomUtil;
 import com.share.novel.utils.Result;
 
 import cn.hutool.jwt.JWTUtil;
@@ -26,6 +28,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
 
     @Autowired
     UserMapper userMapper;
+
+    @Value("${show.uname}")
+    String su;
 
     @Override
     public String getToken(User user){
@@ -141,4 +146,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
             return Result.error("密码错误", "");
     }
 
+    @Override
+    public String getUname(Integer id){
+        //先在redis中查询
+        String key = su+id;
+        String result = stringRedisTemplate.opsForValue().get(key);
+
+        if(result==null){
+            User user = userMapper.selectById(id);
+            result = Result.success("查找成功", user.getUname());
+            stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        }
+
+        return result;
+    }
 }

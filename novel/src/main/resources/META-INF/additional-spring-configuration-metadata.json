@@ -48,5 +48,15 @@
     "name": "commentslike.cid.uid",
     "type": "java.lang.String",
     "description": "A description for 'commentslike.id.cid.uid'"
+  },
+  {
+    "name": "show.novels.content.sort.current.size",
+    "type": "java.lang.String",
+    "description": "A description for 'show.novels.content.sort.current.size'"
+  },
+  {
+    "name": "show.uname",
+    "type": "java.lang.String",
+    "description": "A description for 'show.uname'"
   }
 ]}
