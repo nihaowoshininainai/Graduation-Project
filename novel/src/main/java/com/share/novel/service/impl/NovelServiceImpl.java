@@ -58,11 +58,11 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
             LambdaQueryWrapper<Novel> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Novel::getState, 1);
             SFunction<Novel, ?> orderBy = null;
-            if (condition==Condition.hot.name())
+            if (condition.equals(Condition.hot.name()))
                 orderBy = Novel::getViews;
             else
                 orderBy = Novel::getCreateTime;
-            if(sort==Sort.desc.name()){
+            if(sort.equals(Sort.desc.name())){
                 queryWrapper.orderByDesc(orderBy);
             }
             else
