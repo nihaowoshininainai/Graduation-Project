@@ -1,16 +1,6 @@
 import request from "."
 
-enum Condition{
-    time,
-    hot
-}
-
-enum Sort{
-    asc,
-    desc
-}
-
-export const getIndexNovel = (current:number,size:number,condition?:Condition,sort?:Sort)=>{
+export const getIndexNovel = (current:number,size:number,condition?:string,sort?:string)=>{
     return request.get("index",{
         params:{
             current:current,
