@@ -14,6 +14,8 @@ public interface NovelService extends IService<Novel> {
     //分页推送,
     String index(String condition,String sort,Integer current,Integer size);
 
+    //分类推送
+    String classify(String condition,String sort,Integer current,Integer size,Integer labelId);
     /*
      * @param time 按照时间排序
      * @param hot 按照热度排序

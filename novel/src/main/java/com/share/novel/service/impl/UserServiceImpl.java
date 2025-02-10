@@ -29,7 +29,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
     @Autowired
     UserMapper userMapper;
 
-    @Value("${show.uname}")
+    @Value("${show.uname.uid}")
     String su;
 
     @Override

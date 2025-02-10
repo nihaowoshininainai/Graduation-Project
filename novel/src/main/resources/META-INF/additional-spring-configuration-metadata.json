@@ -25,19 +25,24 @@
     "description": "A description for 'label.id'"
   },
   {
+    "name": "label.all",
+    "type": "java.lang.String",
+    "description": "A description for 'label.all'"
+  },
+  {
     "name": "novel.uid",
     "type": "java.lang.String",
     "description": "A description for 'novel.uid'"
   },
   {
-    "name": "novellabel.nid.lid",
-    "type": "java.lang.String",
-    "description": "A description for 'novellabel.nid.lid'"
-  },
-  {
     "name": "novel.id",
     "type": "java.lang.String",
     "description": "A description for 'novel.id'"
+  },
+  {
+    "name": "novellabel.nid.lid",
+    "type": "java.lang.String",
+    "description": "A description for 'novellabel.nid.lid'"
   },
   {
     "name": "user.id",
@@ -47,7 +52,7 @@
   {
     "name": "commentslike.cid.uid",
     "type": "java.lang.String",
-    "description": "A description for 'commentslike.id.cid.uid'"
+    "description": "A description for 'commentslike.cid.uid'"
   },
   {
     "name": "show.novels.content.sort.current.size",
@@ -55,8 +60,13 @@
     "description": "A description for 'show.novels.content.sort.current.size'"
   },
   {
-    "name": "show.uname",
+    "name": "show.uname.uid",
     "type": "java.lang.String",
-    "description": "A description for 'show.uname'"
+    "description": "A description for 'show.uname.uid'"
+  },
+  {
+    "name": "show.novels.classify.lableId.sort.current.size",
+    "type": "java.lang.String",
+    "description": "A description for 'show.uname.classify.lableId.sort.current.size'"
   }
 ]}
