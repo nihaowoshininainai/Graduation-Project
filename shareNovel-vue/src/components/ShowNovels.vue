@@ -1,6 +1,6 @@
 <!-- 这是主页 -->
 <script setup lang="ts">
-import type { Novel } from '@/baseType';
+import type { Label, Novel } from '@/baseType';
 import { Condition, Sort } from '@/enmu';
 import { getIndexNovel } from '@/request/novel';
 import { getUname } from '@/request/user';
@@ -8,6 +8,11 @@ import router from '@/router';
 import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+const props = defineProps<{
+    labels?: Label[],
+    currentLabel?: string
+}>()
+const currentLabel = ref(props.currentLabel)
 const pageCount = ref(0)
 const route = useRoute()
 const current = ref(Number(route.params.page))
@@ -15,12 +20,12 @@ const novel = ref<Novel[]>([])
 const unames = ref<string[]>([])
 const condition = ref<Condition>(Condition.hot)
 const sort = ref<Sort>(Sort.desc)
-const getData = () => {
-    getIndexNovel(current.value, import.meta.env.VITE_PAGE_SIZE, Condition[condition.value], Sort[sort.value]).then((result) => {
+const getData = (labelId?:number) => {
+    getIndexNovel(current.value, import.meta.env.VITE_PAGE_SIZE, Condition[condition.value], Sort[sort.value], labelId).then((result) => {
         if (import.meta.env.DEV) {
             console.log(result.data.data)
             console.log(Condition[condition.value]);
-            
+
         }
         pageCount.value = result.data.data.pages
         novel.value = result.data.data.novels
@@ -58,10 +63,21 @@ const goToUser = (uid: number) => {
 getData()
 </script>
 <template>
+    <div class="classify" v-if="currentLabel">
+        <div>
+            <el-button :type="currentLabel === '全部' ? 'primary' : ''" @click="currentLabel = '全部'">全部</el-button>
+        </div>
+        <div v-for="label in labels" :key="label.id">
+            <el-button :type="currentLabel === label.name ? 'primary' : ''"
+                @click="currentLabel = label.name;getData(label.id)">{{ label.name }}</el-button>
+        </div>
+    </div>
     <el-row>
         <el-col :span="12">
-            <el-button :type="condition === Condition.hot ? 'primary' : ''" @click="condition = Condition.hot; getData()">按热度</el-button>
-            <el-button :type="condition === Condition.time ? 'primary' : ''" @click="condition = Condition.time; getData()">按时间</el-button>
+            <el-button :type="condition === Condition.hot ? 'primary' : ''"
+                @click="condition = Condition.hot; getData()">按热度</el-button>
+            <el-button :type="condition === Condition.time ? 'primary' : ''"
+                @click="condition = Condition.time; getData()">按时间</el-button>
         </el-col>
         <el-col :span="12">
             <el-button :type="sort === Sort.asc ? 'primary' : ''" @click="sort = Sort.asc; getData()">升序</el-button>
@@ -88,7 +104,7 @@ getData()
     </div>
     <el-pagination background layout="prev, pager, next" :page-count="pageCount" v-model:current-page="current" />
 </template>
-<style lang="less" scoped>
+<style lang="less">
 .el-pagination {
     margin-top: 20px;
     display: flex;
@@ -110,8 +126,18 @@ getData()
     flex-wrap: wrap;
     justify-content: center;
 }
+
 .el-col {
     display: flex;
     justify-content: center;
+}
+.classify{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 10px;
+    .el-button{
+        margin: 10px;
+    }
 }
 </style>

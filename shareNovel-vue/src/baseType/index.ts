@@ -7,3 +7,8 @@ export type Novel = {
     views:number,
     state:number
 }
+
+export type Label = {
+    id:number,
+    name:string
+}

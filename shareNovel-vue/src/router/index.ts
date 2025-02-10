@@ -17,7 +17,7 @@ const router = createRouter({
     component:HomeView
   },
   {
-    path:'/classify',
+    path:'/classify/page/:page',
     name:'分类界面',
     component:ClassifyView
   },

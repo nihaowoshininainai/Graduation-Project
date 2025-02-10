@@ -6,7 +6,7 @@
             <RouterLink to="/">
                 <el-link>首页</el-link>
             </RouterLink>
-            <RouterLink to="/classify">
+            <RouterLink to="/classify/page/1">
                 <el-link>分类</el-link>
             </RouterLink>
             <RouterLink to="/recommend">
