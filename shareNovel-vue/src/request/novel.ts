@@ -1,5 +1,6 @@
 import request from "."
 
+//获取小说
 export const getIndexNovel = (current: number, size: number, condition?: string, sort?: string, labelId?: number) => {
     if (labelId && labelId !== -1)
     {

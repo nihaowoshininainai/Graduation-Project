@@ -12,3 +12,17 @@ export type Label = {
     id:number,
     name:string
 }
+
+export type User = {
+    uid?:number,
+    createTime?:string,
+    pwd?:string,
+    uname:string,
+    banned?:number
+}
+
+export type Result = {
+    state:string,
+    message:string,
+    data:any
+}

@@ -32,6 +32,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
     @Value("${show.uname.uid}")
     String su;
 
+    @Value("${jwt.key}")
+    String key;
+
     @Override
     public String getToken(User user){
         Map<String,Object> payload = new HashMap<>();
@@ -44,7 +47,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         //添加此负载为了使相同用户多次登陆有不同jwt，提高安全性
         payload.put("change", System.currentTimeMillis());
 
-        String token = JWTUtil.createToken(payload, stringRedisTemplate.opsForValue().get("secretkey").getBytes());
+        String token = JWTUtil.createToken(payload, key.getBytes());
 
         //生成的token存入redis
         stringRedisTemplate.opsForValue().set("token:"+user.getUid()+":"+token, "true", 1, TimeUnit.DAYS);

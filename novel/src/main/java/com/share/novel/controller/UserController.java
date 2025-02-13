@@ -3,6 +3,7 @@ package com.share.novel.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.share.novel.base.User;
 import com.share.novel.service.UserService;
 import com.share.novel.utils.ControllerUtil;
 import com.share.novel.utils.Result;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController()
@@ -41,8 +43,8 @@ public class UserController {
 
     //注册
     @PostMapping("/register")
-    public String register(String uname,String pwd) {
-        return userService.register(uname, pwd);
+    public String register(@RequestBody User user) {
+        return userService.register(user.getUname(),user.getPwd());
     }
 
     //登陆

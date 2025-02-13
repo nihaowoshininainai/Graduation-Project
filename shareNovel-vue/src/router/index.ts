@@ -25,6 +25,16 @@ const router = createRouter({
     path:'/recommend',
     name:'推荐界面',
     component:RecommendView
+  },
+  {
+    path:'/login',
+    name:'登录界面',
+    component:()=>import('@/views/LoginView.vue')
+  },
+  {
+    path:'/register',
+    name:'注册界面',
+    component:()=>import('@/views/RegisterView.vue')
   }
   ],
 })

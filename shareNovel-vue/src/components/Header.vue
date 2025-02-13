@@ -16,23 +16,26 @@
         <el-col :span="6">
             搜索
         </el-col>
-        <el-col :span="6" v-if="!flag" style="display: flex;">
-            <el-link>登陆</el-link>
+        <el-col :span="6" v-if="!(cookie.length!==0)" style="display: flex;">
+            <RouterLink to="/login">
+                <el-link>登录</el-link>
+            </RouterLink>
             |
-            <el-link>注册</el-link>
+            <RouterLink to="/register">
+                <el-link>注册</el-link> 
+            </RouterLink>
         </el-col>
-        <el-col :span="6" v-if="flag">
+        <el-col :span="6" v-if="cookie.length!==0">
             <el-link>用户</el-link>
         </el-col>
     </el-row>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
+import { RouterLink } from 'vue-router';
 
 const cookie = document.cookie
-const flag = ref(true)
-if(cookie.length===0)
-    flag.value = false
+
 
 </script>
 <style lang="less" scoped>

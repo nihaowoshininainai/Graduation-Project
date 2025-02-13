@@ -271,7 +271,7 @@
 - - - 返回值：json字符串
 - - - - state 状态值（1为成功，0为失败）
 - - - - message 说明信息
-- - - - data uname:string
+- - - - data novels:Novel[]
 
 - - 获取用户名
 - - - 路径：/showUname
@@ -282,3 +282,27 @@
 - - - - state 状态值（1为成功，0为失败）
 - - - - message 说明信息
 - - - - data uname:string
+
+- - 获取标签列表
+- - - 路径：/labels
+- - - 方法：get
+- - - 参数：
+- - - - 无
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data uname:string
+
+- - 获取分类小说信息
+- - - 路径：/classify
+- - - 方法：get
+- - - 参数：
+- - - - current:number
+- - - - size:number
+- - - - condition:Condition 枚举类：time,hot
+- - - - sort:Sort 枚举类：asc,desc
+- - - - labelId:number 标签id
+- - - 返回值：json字符串
+- - - - state 状态值（1为成功，0为失败）
+- - - - message 说明信息
+- - - - data novels:Novel[]
