@@ -49,8 +49,8 @@ public class UserController {
 
     //登陆
     @PostMapping("/login")
-    public String login(String uname,String pwd){
-        return userService.login(uname, pwd);
+    public String login(@RequestBody User user) {
+        return userService.login(user.getUname(), user.getPwd());
     }
     
     //修改密码

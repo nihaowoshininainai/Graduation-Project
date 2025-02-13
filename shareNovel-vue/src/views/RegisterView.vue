@@ -8,7 +8,7 @@
             <el-input v-model="user.password" type="password" placeholder="请输入密码"></el-input>
         </el-form-item>
         <el-form-item label="确认密码" prop="repeatPassword">
-            <el-input type="password" v-model="user.repeatPassword" placeholder="请再次输入密码"></el-input>
+            <el-input type="password" v-model="user.repeatPassword" placeholder="请再次输入密码" @keydown.enter="registerForm(userFormRef)"></el-input>
         </el-form-item>
         <el-form-item>
             <el-button type="primary" @click="registerForm(userFormRef)">注册</el-button>
@@ -21,10 +21,6 @@ import { reactive, ref } from 'vue';
 import { register } from '@/request/user';
 import router from '@/router';
 import type { Result, User } from '@/baseType';
-
-if (document.cookie.length !== 0) {
-    router.push('/')
-}
 
 const userFormRef = ref<FormInstance>()
 const user = reactive({
@@ -47,7 +43,17 @@ const rules = reactive<FormRules<{ username: string, password: string, repeatPas
         }
     ],
     password: [
-        { required: true, message: '请输入密码', trigger: 'blur' }
+        { required: true, message: '请输入密码', trigger: 'blur' },
+        {
+            validator: (rule, value, callback) => {
+                const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,12}$/;
+                if (!regex.test(value)) {
+                    callback(new Error('密码必须包含并且只能包含字母和数字，长度在8-12个字符'));
+                } else {
+                    callback();
+                }
+            }, trigger: 'blur'
+        }
     ],
     repeatPassword: [
         { required: true, message: '请再次输入密码', trigger: 'blur' },
@@ -69,13 +75,18 @@ const registerForm = (formEl: FormInstance | undefined) => {
             register(user.username, user.password).then(res => {
                 const result: Result = res.data
                 if (result.state === '1') {
-                    ElMessage.success(result.message)
-                    document.cookie = `Token=${result.data};path=/`
-                    const userself: User = {
-                        uname: user.username
-                    }
-                    window.localStorage.setItem('user', JSON.stringify(userself))
-                    router.go(0)
+                    ElMessage.success({
+                        message: result.message,
+                        duration: 1000,
+                        onClose: () => {
+                            document.cookie = `Token=${result.data};path=/`
+                            const userself: User = {
+                                uname: user.username
+                            }
+                            window.localStorage.setItem('user', JSON.stringify(userself))
+                            router.go(0)
+                        }
+                    })
                 } else {
                     ElMessage.warning(result.message)
                 }
