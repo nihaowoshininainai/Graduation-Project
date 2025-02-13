@@ -5,7 +5,7 @@ import { getLabels } from '@/request/label';
 import { ref } from 'vue';
 
 const labels = ref<Label[]>([])
-const currentLabel = '全部'
+const currentLabel = -1
 getLabels.then((result) => {
     labels.value = result.data.data
     if(import.meta.env.DEV){

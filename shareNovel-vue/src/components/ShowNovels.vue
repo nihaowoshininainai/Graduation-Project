@@ -10,7 +10,7 @@ import { useRoute } from 'vue-router';
 
 const props = defineProps<{
     labels?: Label[],
-    currentLabel?: string
+    currentLabel?: number
 }>()
 const currentLabel = ref(props.currentLabel)
 const pageCount = ref(0)
@@ -65,23 +65,23 @@ getData()
 <template>
     <div class="classify" v-if="currentLabel">
         <div>
-            <el-button :type="currentLabel === '全部' ? 'primary' : ''" @click="currentLabel = '全部'">全部</el-button>
+            <el-button :type="currentLabel === -1 ? 'primary' : ''" @click="currentLabel = -1;getData()">全部</el-button>
         </div>
         <div v-for="label in labels" :key="label.id">
-            <el-button :type="currentLabel === label.name ? 'primary' : ''"
-                @click="currentLabel = label.name;getData(label.id)">{{ label.name }}</el-button>
+            <el-button :type="currentLabel === label.id ? 'primary' : ''"
+                @click="currentLabel = label.id;getData(label.id)">{{ label.name }}</el-button>
         </div>
     </div>
     <el-row>
         <el-col :span="12">
             <el-button :type="condition === Condition.hot ? 'primary' : ''"
-                @click="condition = Condition.hot; getData()">按热度</el-button>
+                @click="condition = Condition.hot; getData(currentLabel)">按热度</el-button>
             <el-button :type="condition === Condition.time ? 'primary' : ''"
-                @click="condition = Condition.time; getData()">按时间</el-button>
+                @click="condition = Condition.time; getData(currentLabel)">按时间</el-button>
         </el-col>
         <el-col :span="12">
-            <el-button :type="sort === Sort.asc ? 'primary' : ''" @click="sort = Sort.asc; getData()">升序</el-button>
-            <el-button :type="sort === Sort.desc ? 'primary' : ''" @click="sort = Sort.desc; getData()">降序</el-button>
+            <el-button :type="sort === Sort.asc ? 'primary' : ''" @click="sort = Sort.asc; getData(currentLabel)">升序</el-button>
+            <el-button :type="sort === Sort.desc ? 'primary' : ''" @click="sort = Sort.desc; getData(currentLabel)">降序</el-button>
         </el-col>
     </el-row>
     <div class="common-layout">
