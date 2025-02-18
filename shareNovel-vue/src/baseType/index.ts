@@ -1,11 +1,11 @@
 export type Novel = {
-    id:number,
+    id?:number,
     title:string,
     content:string,
-    createTime:string,
-    uid:number,
-    views:number,
-    state:number
+    createTime?:string,
+    uid?:number,
+    views?:number,
+    state?:number
 }
 
 export type Label = {
@@ -25,4 +25,10 @@ export type Result = {
     state:string,
     message:string,
     data:any
+}
+
+export type NovelLabel = {
+    id?:number,
+    nid:number,
+    lid:number
 }

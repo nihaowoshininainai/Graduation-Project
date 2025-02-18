@@ -30,4 +30,6 @@ public interface UserService extends IService<User>{
     //根据id查询用户名
     String getUname(Integer id);
 
+    String getUid(String uname);
+
 }

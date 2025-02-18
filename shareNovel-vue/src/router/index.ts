@@ -1,3 +1,5 @@
+import type { Result, User } from '@/baseType'
+import { getUid } from '@/request/user'
 import ClassifyView from '@/views/ClassifyView.vue'
 import HomeView from '@/views/HomeView.vue'
 import RecommendView from '@/views/RecommendView.vue'
@@ -51,6 +53,34 @@ const router = createRouter({
         next()
     },
     component: () => import('@/views/RegisterView.vue')
+  },
+  {
+    path: '/user/:id',
+    name: '用户界面',
+    beforeEnter: (to, from, next) => {
+      if (document.cookie.length === 0) {
+        ElMessage.error({
+          message: '请先登录',
+          duration: 1000
+        })
+        next('/login')
+      } else {
+        const user: User = JSON.parse(localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) as string)
+        if (user.uid !== undefined)
+          next()
+        else {
+          getUid(user.uname).then(res => {
+            const result: Result = res.data
+            user.uid = result.data
+            localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_USER, JSON.stringify(user))
+            next(`/user/${user.uid}`)
+          }
+          )
+        }
+      }
+    },
+    props: true,
+    component: () => import('@/views/UserView.vue')
   }
   ],
 })

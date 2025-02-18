@@ -68,5 +68,25 @@
     "name": "show.novels.classify.lableId.sort.current.size",
     "type": "java.lang.String",
     "description": "A description for 'show.uname.classify.lableId.sort.current.size'"
+  },
+  {
+    "name": "show.uid.uname",
+    "type": "java.lang.String",
+    "description": "A description for 'show.uid.uname'"
+  },
+  {
+    "name": "show.novels.uid",
+    "type": "java.lang.String",
+    "description": "A description for 'show.novels.uid'"
+  },
+  {
+    "name": "show.novels.like.uid",
+    "type": "java.lang.String",
+    "description": "A description for 'show.novels.like.uid'"
+  },
+  {
+    "name": "collections.uid",
+    "type": "java.lang.String",
+    "description": "A description for 'collections.uid'"
   }
 ]}

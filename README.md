@@ -235,6 +235,7 @@
 - - - 方法：post
 - - - 参数：
 - - - - novel:Novel  必须包含title,content
+- - - - user:User 必须包含pwd
 - - - 返回值：json字符串
 - - - - state 状态值（1为成功，0为失败）
 - - - - message 说明信息
@@ -306,3 +307,4 @@
 - - - - state 状态值（1为成功，0为失败）
 - - - - message 说明信息
 - - - - data novels:Novel[]
+

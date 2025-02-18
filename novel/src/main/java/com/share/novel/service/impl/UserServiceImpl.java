@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.share.novel.base.User;
@@ -34,6 +35,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
 
     @Value("${jwt.key}")
     String key;
+
+    @Value("${show.uid.uname}")
+    String suu;
 
     @Override
     public String getToken(User user){
@@ -163,4 +167,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
 
         return result;
     }
+
+    @Override
+    public String getUid(String uname){
+        //先在redis中查询
+        String key = suu+uname;
+        String result = stringRedisTemplate.opsForValue().get(key);
+
+        if(result==null){
+            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(User::getUname, uname);
+            User user = userMapper.selectOne(queryWrapper);
+            result = Result.success("查找成功", user.getUid());
+            stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        }
+
+        return result;
+    }
+    
 }

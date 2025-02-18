@@ -42,12 +42,16 @@ public class ControllerUtil {
         if(flag){
             User user = JSONUtil.toBean(JWTUtil.parseToken(token).getPayload("user").toString(), User.class);
             Integer uid = user.getUid();
+            Integer banned = user.getBanned();
+            if(banned==1){
+                return Result.error("您已被封号", "");
+            }
 
             //查找redis中是否有该token
             String exist = stringRedisTemplate.opsForValue().get("token:"+uid+":"+token);
 
             if(exist!=null){
-                return Result.success("Token存在", uid.toString());
+                return Result.success("Token存在", uid);
             }
             else
                 return Result.error("Token已过期，请重新登陆", "");

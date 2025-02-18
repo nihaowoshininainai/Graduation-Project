@@ -32,7 +32,7 @@ const getData = (labelId?:number) => {
         if (import.meta.env.DEV)
             console.log(novel.value);
         novel.value.forEach((element, index) => {
-            getUname(element.uid).then((result) => {
+            getUname(element.uid as number).then((result) => {
                 if (import.meta.env.DEV) {
                     console.log(result)
                 }
@@ -95,7 +95,7 @@ getData()
             <template #footer>
                 <div>
                     <span>{{ item.createTime }}</span>
-                    <span @click="goToUser(item.uid)">
+                    <span @click="goToUser(item.uid as number)">
                         <el-link>{{ unames[index] }}</el-link>
                     </span>
                 </div>

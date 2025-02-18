@@ -1,5 +1,7 @@
 package com.share.novel.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.share.novel.base.Collection;
+import com.share.novel.base.Novel;
+import com.share.novel.base.User;
+import com.share.novel.service.CollectionService;
 import com.share.novel.service.LabelService;
 import com.share.novel.service.NovelService;
 import com.share.novel.service.UserService;
@@ -30,10 +37,22 @@ public class ShowController {
     LabelService labelService;
 
     @Autowired
+    CollectionService collectionService;
+
+    @Autowired
     StringRedisTemplate stringRedisTemplate;
 
     @Value("${label.all}")
     String la;
+
+    @Value("${user.id}")
+    String ui;
+
+    @Value("${show.novels.uid}")
+    String snu; 
+
+    @Value("${show.novels.like.uid}")
+    String snlu;
 
     //首页小说请求
     @GetMapping("/index")
@@ -68,5 +87,71 @@ public class ShowController {
 
         return result;
     }
-    
+  
+    //根据用户名查询用户id
+    @GetMapping("/showUid")
+    String showUid(@RequestParam("uname") String uname){
+        return userService.getUid(uname);
+    }
+   
+    //根据用户id查询用户信息
+    @GetMapping("/showUser")
+    String showUser(@RequestParam("uid") Integer uid){
+        //查询redis中是否存有缓存
+        String result = stringRedisTemplate.opsForValue().get(ui+uid);
+
+        if(result==null){
+            User user = userService.getById(uid);
+            user.setPwd("");
+            result = Result.success("查询成功", user);
+            stringRedisTemplate.opsForValue().set(ui+uid, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        }
+
+        return result;
+    }
+
+    //根据用户id查询上传的小说
+    @GetMapping("/showNovels")
+    String showNovels(@RequestParam("uid") Integer uid){
+        //查询redis中是否存有缓存
+        String result = stringRedisTemplate.opsForValue().get(snu+uid);
+
+        if(result==null){
+            LambdaQueryWrapper<Novel> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Novel::getUid, uid);
+            result = Result.success("查询成功", novelService.list(wrapper));
+            stringRedisTemplate.opsForValue().set(snu+uid, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        }
+
+        return result;
+    }
+
+    //获取用户收藏
+    @GetMapping("/showCollections")
+    String showNovelsLike(@RequestParam("uid") Integer uid){
+        //查询redis中是否存有缓存
+        String key = snlu+uid;
+        String result = stringRedisTemplate.opsForValue().get(key);
+
+        if(result==null){
+            List<Collection> collections = collectionService.getCollectionListByUserId(uid);
+            if(collections.isEmpty()){
+                result = Result.success("查询成功", "");
+                stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+            }
+            else{
+                List<Integer> ids = new ArrayList<>();
+                for(Collection collection : collections){
+                    ids.add(collection.getNid());
+                }
+                LambdaQueryWrapper<Novel> wrapper = new LambdaQueryWrapper<>();
+                wrapper.in(Novel::getId, ids);
+                result = Result.success("查询成功", novelService.list(wrapper));
+            }
+        }
+
+        return result;
+
+    }
+
 }

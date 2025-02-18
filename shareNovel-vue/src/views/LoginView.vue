@@ -45,7 +45,8 @@ const loginForm = (formEl:FormInstance|undefined)=>{
                         duration: 1000,
                         onClose: () => {
                             document.cookie = `Token=${result.data};path=/`
-                            window.localStorage.setItem('user', JSON.stringify(user.value))
+                            user.value.pwd = ''
+                            window.localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_USER, JSON.stringify(user.value))
                             router.go(0)
                         }
                     })

@@ -16,36 +16,40 @@
         <el-col :span="6">
             搜索
         </el-col>
-        <el-col :span="6" v-if="!(cookie.length!==0)" style="display: flex;">
+        <el-col :span="6" v-if="!(cookie.length !== 0)" style="display: flex;">
             <RouterLink to="/login">
                 <el-link>登录</el-link>
             </RouterLink>
             |
             <RouterLink to="/register">
-                <el-link>注册</el-link> 
+                <el-link>注册</el-link>
             </RouterLink>
         </el-col>
-        <el-col :span="6" v-if="cookie.length!==0">
-            <el-link>用户</el-link>
+        <el-col :span="6" v-if="cookie.length !== 0">
+            <RouterLink :to="'/user/' + user.uid">
+                <el-link>{{ user.uname }}</el-link>
+            </RouterLink>
         </el-col>
     </el-row>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import type { User } from '@/baseType';
 import { RouterLink } from 'vue-router';
 
 const cookie = document.cookie
-
+const user: User = JSON.parse(window.localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) || '{}') as User;
 
 </script>
 <style lang="less" scoped>
-.el-row{
+.el-row {
     font-size: var(--el-font-size-base);
-    .el-col{
+
+    .el-col {
         text-align: center;
     }
 }
-.el-link{
+
+.el-link {
     display: block;
     height: 100%;
 }

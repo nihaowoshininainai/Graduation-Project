@@ -65,8 +65,13 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
     @Override
     public String add(Novel novel) {
         int a = novelMapper.insert(novel);
-        if(a>0)
-            return Result.success("添加成功", "");
+        if(a>0){
+            LambdaQueryWrapper<Novel> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Novel::getTitle, queryWrapper);
+            novelMapper.selectOne(queryWrapper);
+
+            return Result.success("添加成功", novel.getId());
+        }
         return Result.error("添加失败，请重试", "");
     }
 

@@ -83,7 +83,7 @@ const registerForm = (formEl: FormInstance | undefined) => {
                             const userself: User = {
                                 uname: user.username
                             }
-                            window.localStorage.setItem('user', JSON.stringify(userself))
+                            window.localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_USER, JSON.stringify(userself))
                             router.go(0)
                         }
                     })
