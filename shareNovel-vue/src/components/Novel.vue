@@ -121,7 +121,17 @@ function disLike(novel: Novel) {
             ElMessage.success(result.message)
         }
         else {
-            ElMessage.error(result.message)
+            ElMessage.error({
+                message: result.message,
+                duration: 2000,
+                onClose:()=>{
+                    if(result.message === import.meta.env.VITE_MESSAGE_RELOGIN){
+                        localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
+                        document.cookie += ";max-age=0"
+                        router.push('/login')
+                    }
+                }
+            })
         }
     })
 }
