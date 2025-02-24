@@ -12,10 +12,9 @@
   },
   "dependencies": {
     "@wangeditor/editor": "^5.1.23",
-    "@wangeditor/editor-for-vue": "^1.0.2",
+    "@wangeditor/editor-for-vue": "^5.1.12",
     "axios": "^1.7.9",
     "element-plus": "^2.9.3",
-    "less": "^4.2.2",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
@@ -24,6 +23,7 @@
     "@types/node": "^22.10.7",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",
+    "less": "^4.2.2",
     "npm-run-all2": "^7.0.2",
     "typescript": "~5.7.3",
     "unplugin-auto-import": "^19.0.0",
