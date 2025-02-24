@@ -1,7 +1,8 @@
+<!-- 用户小说 -->
 <template>
     <el-table :data="novels">
         <el-table-column prop="title" label="小说名" />
-        <el-table-column prop="createTime" label="收藏时间" />
+        <el-table-column prop="createTime" label="创作时间" />
         <el-table-column prop="views" label="浏览量" />
         <el-table-column prop="state" label="状态" />
     </el-table>

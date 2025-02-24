@@ -19,6 +19,6 @@ public class Comments {
     Integer id;
     Integer nid;
     Integer uid;
-    Integer content;
+    String content;
     Integer state;
 }

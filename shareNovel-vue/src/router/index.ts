@@ -81,6 +81,12 @@ const router = createRouter({
     },
     props: true,
     component: () => import('@/views/UserView.vue')
+  },
+  {
+    path: '/novel/:id',
+    name: '小说界面',
+    props: true,
+    component: () => import('@/views/NovelView.vue')
   }
   ],
 })

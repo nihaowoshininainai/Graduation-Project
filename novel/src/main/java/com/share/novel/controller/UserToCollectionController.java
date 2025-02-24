@@ -35,6 +35,12 @@ public class UserToCollectionController {
     @Value("${collection.uid.nid}")
     String cun;
 
+    @Value("${show.novel.like.uid}")
+    String snl;
+
+    @Value("${show.novels.like.uid}")
+    String snlu;
+
     //添加收藏
     @PostMapping("/addCol")
     public String addCol(HttpServletRequest httpServletRequest,@RequestBody Novel novel){
@@ -47,6 +53,8 @@ public class UserToCollectionController {
                 
                 //删除查找该用户的收藏缓存
                 stringRedisTemplate.delete(stringRedisTemplate.keys(cun+uid+"*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(snl+uid+"*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(snlu+uid+"*"));
 
                 return Result.success("成功收藏", "");
             }
@@ -59,7 +67,7 @@ public class UserToCollectionController {
     }
 
     //删除收藏
-    @PostMapping("delCol")
+    @PostMapping("/delCol")
     public String delCol(HttpServletRequest httpServletRequest,@RequestBody Novel novel){
         Function<Integer,String> function = uid -> {
             Collection collection = new Collection();
@@ -71,6 +79,8 @@ public class UserToCollectionController {
                 
                 //删除查找该用户的收藏缓存
                 stringRedisTemplate.delete(stringRedisTemplate.keys(cun+uid+"*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(snl+uid+"*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(snlu+uid+"*"));
 
                 return Result.success("取消收藏", "");
             }

@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Comments: typeof import('./src/components/Comments.vue')['default']
     ElAffix: typeof import('element-plus/es')['ElAffix']
     ElBottun: typeof import('element-plus/es')['ElBottun']
     ElButton: typeof import('element-plus/es')['ElButton']
@@ -23,6 +24,7 @@ declare module 'vue' {
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElHeader: typeof import('element-plus/es')['ElHeader']
+    ElHtml: typeof import('element-plus/es')['ElHtml']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElLin: typeof import('element-plus/es')['ElLin']
     ElLink: typeof import('element-plus/es')['ElLink']
@@ -44,6 +46,7 @@ declare module 'vue' {
     IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']
     IconSupport: typeof import('./src/components/icons/IconSupport.vue')['default']
     IconTooling: typeof import('./src/components/icons/IconTooling.vue')['default']
+    Novel: typeof import('./src/components/Novel.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ShowCollectNovels: typeof import('./src/components/ShowCollectNovels.vue')['default']

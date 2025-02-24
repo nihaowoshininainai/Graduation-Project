@@ -88,5 +88,25 @@
     "name": "collections.uid",
     "type": "java.lang.String",
     "description": "A description for 'collections.uid'"
+  },
+  {
+    "name": "show.novel.nid",
+    "type": "java.lang.String",
+    "description": "A description for 'show.novel.nid'"
+  },
+  {
+    "name": "show.comments.nid",
+    "type": "java.lang.String",
+    "description": "A description for 'show.comments.nid'"
+  },
+  {
+    "name": "show.novel.like.uid",
+    "type": "java.lang.String",
+    "description": "A description for 'show.novel.like.uid'"
+  },
+  {
+    "name": "show.novel.views.nid",
+    "type": "java.lang.String",
+    "description": "A description for 'show.novel.views.nid'"
   }
 ]}

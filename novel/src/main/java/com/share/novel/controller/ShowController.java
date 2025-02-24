@@ -14,14 +14,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.share.novel.base.Collection;
+import com.share.novel.base.Comments;
 import com.share.novel.base.Novel;
 import com.share.novel.base.User;
 import com.share.novel.service.CollectionService;
+import com.share.novel.service.CommentsService;
 import com.share.novel.service.LabelService;
 import com.share.novel.service.NovelService;
 import com.share.novel.service.UserService;
 import com.share.novel.utils.RandomUtil;
 import com.share.novel.utils.Result;
+
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 
 @RestController
 @RequestMapping("/api")
@@ -40,6 +45,9 @@ public class ShowController {
     CollectionService collectionService;
 
     @Autowired
+    CommentsService commentsService;
+
+    @Autowired
     StringRedisTemplate stringRedisTemplate;
 
     @Value("${label.all}")
@@ -53,6 +61,15 @@ public class ShowController {
 
     @Value("${show.novels.like.uid}")
     String snlu;
+
+    @Value("${show.novel.nid}")
+    String snn;
+
+    @Value("${show.comments.nid}")
+    String scn;
+
+    @Value("${show.novel.like.uid}")
+    String snl;
 
     //首页小说请求
     @GetMapping("/index")
@@ -154,4 +171,62 @@ public class ShowController {
 
     }
 
+    //获取小说信息
+    @GetMapping("/showNovel")
+    String showNovel(@RequestParam("nid") Integer nid){
+        //查询redis中是否存有缓存
+        String result = stringRedisTemplate.opsForValue().get(snn+nid);
+
+        if(result==null){
+            Novel novel = novelService.getById(nid);
+            result = Result.success("查询成功", novel);
+            stringRedisTemplate.opsForValue().set(snn+nid, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        }
+
+        return result;
+    }
+
+    //获取小说评论
+    @GetMapping("/showComments")
+    String showComments(@RequestParam("nid") Integer nid){
+        //查询redis中是否存有缓存
+        String key = scn+nid;
+        String result = stringRedisTemplate.opsForValue().get(key);
+
+        if(result==null){
+            LambdaQueryWrapper<Comments> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Comments::getNid, nid);
+            result = Result.success("查询成功", commentsService.list(wrapper));
+            stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        }
+
+        return result;
+    }
+
+    //获取小说点赞
+    @GetMapping("/showLike")
+    String showLike(@RequestParam("nid") Integer nid,@RequestParam("uid") Integer uid){
+        //查询redis中是否存有缓存
+        String key = snl+uid;
+        String result = stringRedisTemplate.opsForValue().get(key);
+
+        if(result==null){
+            LambdaQueryWrapper<Collection> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Collection::getUid, uid);
+            List<Collection> collections = collectionService.list(wrapper);
+            List<Integer> ids = new ArrayList<>();
+            for(Collection collection : collections){
+                ids.add(collection.getNid());
+            }
+
+            result = Result.success("查询成功", ids);
+            stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        }
+
+        JSONObject resultObject = JSONUtil.parseObj(result);
+        List<Integer> ids = resultObject.getJSONArray("data").toList(Integer.class);
+
+        return Result.success("查询成功", ids.contains(nid));
+
+    }
 }

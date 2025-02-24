@@ -5,7 +5,8 @@
             <el-input v-model="user.uname" placeholder="请输入用户名"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="pwd">
-            <el-input v-model="user.pwd" type="password" placeholder="请输入密码" @keydown.enter="loginForm(userFormRef)"></el-input>
+            <el-input v-model="user.pwd" type="password" placeholder="请输入密码"
+                @keydown.enter="loginForm(userFormRef)"></el-input>
         </el-form-item>
         <el-form-item>
             <el-button type="primary" @click="loginForm(userFormRef)">登录</el-button>
@@ -14,7 +15,7 @@
 </template>
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
-import { login } from '@/request/user';
+import { getUid, login } from '@/request/user';
 import router from '@/router';
 import type { FormInstance, FormRules } from 'element-plus';
 import type { Result, User } from '@/baseType';
@@ -32,29 +33,37 @@ const rules = reactive<FormRules<User>>({
         { required: true, message: '请输入密码', trigger: 'blur' }
     ]
 })
-const loginForm = (formEl:FormInstance|undefined)=>{
-    if(!formEl) return
-    formEl.validate(valid=>{
-        if(valid){
-            login(user.value.uname,user.value.pwd?user.value.pwd:'').then(res=>{
-                const result:Result = res.data
-                if(import.meta.env.DEV) console.log(result)
-                if(result.state==='1'){
+const loginForm = (formEl: FormInstance | undefined) => {
+    if (!formEl) return
+    formEl.validate(valid => {
+        if (valid) {
+            login(user.value.uname, user.value.pwd ? user.value.pwd : '').then(res => {
+                const result: Result = res.data
+                if (import.meta.env.DEV) console.log(result)
+                if (result.state === '1') {
+                    document.cookie = `Token=${result.data};path=/`
                     ElMessage.success({
                         message: result.message,
                         duration: 1000,
                         onClose: () => {
-                            document.cookie = `Token=${result.data};path=/`
-                            user.value.pwd = ''
-                            window.localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_USER, JSON.stringify(user.value))
-                            router.go(0)
+                            getUid(user.value.uname).then(res => {
+                                const result: Result = res.data
+                                if (result.state === '1') {
+                                    user.value.uid = result.data
+                                    user.value.pwd = ''
+                                    window.localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_USER, JSON.stringify(user.value))
+                                    router.go(0)
+                                }
+
+                            }
+                            )
                         }
                     })
-                }else{
+                } else {
                     ElMessage.warning(result.message)
                 }
             })
-        }else
+        } else
             ElMessage.warning('请检查输入')
     })
 }

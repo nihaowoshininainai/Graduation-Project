@@ -8,7 +8,8 @@
             <el-input v-model="user.password" type="password" placeholder="请输入密码"></el-input>
         </el-form-item>
         <el-form-item label="确认密码" prop="repeatPassword">
-            <el-input type="password" v-model="user.repeatPassword" placeholder="请再次输入密码" @keydown.enter="registerForm(userFormRef)"></el-input>
+            <el-input type="password" v-model="user.repeatPassword" placeholder="请再次输入密码"
+                @keydown.enter="registerForm(userFormRef)"></el-input>
         </el-form-item>
         <el-form-item>
             <el-button type="primary" @click="registerForm(userFormRef)">注册</el-button>
@@ -18,7 +19,7 @@
 <script setup lang="ts">
 import { type FormRules, type FormInstance } from 'element-plus';
 import { reactive, ref } from 'vue';
-import { register } from '@/request/user';
+import { getUid, register } from '@/request/user';
 import router from '@/router';
 import type { Result, User } from '@/baseType';
 
@@ -83,8 +84,14 @@ const registerForm = (formEl: FormInstance | undefined) => {
                             const userself: User = {
                                 uname: user.username
                             }
-                            window.localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_USER, JSON.stringify(userself))
-                            router.go(0)
+                            getUid(userself.uname).then(res => {
+                                const result: Result = res.data
+                                if (result.state === '1') {
+                                    userself.uid = result.data
+                                    window.localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_USER, JSON.stringify(userself))
+                                    router.go(0)
+                                }
+                            })
                         }
                     })
                 } else {

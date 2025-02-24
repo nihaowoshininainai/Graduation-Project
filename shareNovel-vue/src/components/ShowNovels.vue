@@ -88,7 +88,9 @@ getData()
         <el-card v-for="(item, index) in novel">
             <template #header>
                 <div class="title">
-                    <span>{{ item.title }}</span>
+                    <span @click="router.push(`/novel/${item.id}`)">
+                        <el-link>{{ item.title }}</el-link>
+                    </span>
                 </div>
             </template>
             <el-text>{{ item.content }}</el-text>
@@ -104,7 +106,7 @@ getData()
     </div>
     <el-pagination background layout="prev, pager, next" :page-count="pageCount" v-model:current-page="current" />
 </template>
-<style lang="less">
+<style lang="less" scoped>
 .el-pagination {
     margin-top: 20px;
     display: flex;

@@ -36,6 +36,10 @@
 import type { User } from '@/baseType';
 import { RouterLink } from 'vue-router';
 
+if(localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) === null) {
+    document.cookie += ";max-age=0;path=/"
+}
+
 const cookie = document.cookie
 const user: User = JSON.parse(window.localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) || '{}') as User;
 
@@ -49,8 +53,5 @@ const user: User = JSON.parse(window.localStorage.getItem(import.meta.env.VITE_L
     }
 }
 
-.el-link {
-    display: block;
-    height: 100%;
-}
+
 </style>

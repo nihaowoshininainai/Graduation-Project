@@ -33,6 +33,9 @@ public class CommentsController {
     @Value("${comments.nid.uid}")
     String cnu;
 
+    @Value("${show.comments.nid}")
+    String scn;
+
     //添加评论
     @PostMapping("/addCom")
     public String add(HttpServletRequest httpServletRequest,@RequestBody Comments comments){
@@ -43,6 +46,7 @@ public class CommentsController {
                 
                 //删除评论缓存
                 stringRedisTemplate.delete(stringRedisTemplate.keys(cnu+comments.getNid()+"*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(scn+comments.getNid()+"*"));
 
                 return Result.success("评论成功", "");
             }

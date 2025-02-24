@@ -73,3 +73,25 @@ export const uploadUserNovel = async (data: UserToNovel) => {
 
     return result
 }
+
+//获取小说
+export const getNovelDetail = (novelId: number) => {
+    return request.get("showNovel", {
+        params: {
+            nid: novelId
+        }
+    })
+}
+
+//举报小说
+export const reportNovel = (novel: Novel) => {
+    return request.post("reportNovel", novel).then(res => {
+        const result: Result = res.data
+        if (result.state === '0')
+            ElMessage.error(result.message)
+        else
+            ElMessage.success(result.message)
+    }
+    )
+
+}

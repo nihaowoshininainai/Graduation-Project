@@ -1,3 +1,4 @@
+<!-- 用户信息 -->
 <template>
 <el-descriptions>
 <el-descriptions-item label="用户名">{{ user.uname }}</el-descriptions-item>

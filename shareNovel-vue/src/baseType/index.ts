@@ -32,3 +32,23 @@ export type NovelLabel = {
     nid:number,
     lid:number
 }
+
+export type Comments = {
+    id?:number,
+    nid:number,
+    uid:number,
+    content:string,
+    state?:number
+}
+
+export type Collection = {
+    id:number,
+    uid:number,
+    nid:number
+}
+
+export type CommentsLike = {
+    id:number,
+    uid:number,
+    cid:number
+}
