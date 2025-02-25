@@ -5,6 +5,14 @@ import Header from '@/components/Header.vue'; // 确保你已经导入 Header �
 
 const isScrolled = ref(false);
 
+if(localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) === null) {
+    document.cookie += ";max-age=0;path=/"
+}
+
+if(document.cookie==="") {
+    localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
+}
+
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 0;
 };

@@ -85,6 +85,10 @@ export const getNovelDetail = (novelId: number) => {
 
 //举报小说
 export const reportNovel = (novel: Novel) => {
+    if(document.cookie===""){
+        ElMessage.error("请先登录")
+        return
+    }
     return request.post("reportNovel", novel).then(res => {
         const result: Result = res.data
         if (result.state === '0')

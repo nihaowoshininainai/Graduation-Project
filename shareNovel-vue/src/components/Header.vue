@@ -29,20 +29,24 @@
             <RouterLink :to="'/user/' + user.uid">
                 <el-link>{{ user.uname }}</el-link>
             </RouterLink>
+            |
+            <el-button link type="primary" @click="loginOut" size="small">退出登陆</el-button>
         </el-col>
     </el-row>
 </template>
 <script setup lang="ts">
 import type { User } from '@/baseType';
+import router from '@/router';
 import { RouterLink } from 'vue-router';
-
-if(localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) === null) {
-    document.cookie += ";max-age=0;path=/"
-}
 
 const cookie = document.cookie
 const user: User = JSON.parse(window.localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) || '{}') as User;
 
+const loginOut = ()=>{
+    window.localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
+    router.go(0)
+}
 </script>
 <style lang="less" scoped>
 .el-row {

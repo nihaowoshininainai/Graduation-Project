@@ -14,3 +14,8 @@ export const getComments = (id: number) => {
 export const addComment = (comments:Comments) => {
     return request.post("addCom",comments)
 }
+
+//举报评论
+export const reportComments = (comments:Comments)=>{
+    return request.post('reportComments',comments)
+}
