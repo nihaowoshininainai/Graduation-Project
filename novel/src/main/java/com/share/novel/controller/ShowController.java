@@ -1,7 +1,9 @@
 package com.share.novel.controller;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +72,9 @@ public class ShowController {
 
     @Value("${show.novel.like.uid}")
     String snl;
+
+    @Value("${show.weigui.user.uid}")
+    String swuu;
 
     //首页小说请求
     @GetMapping("/index")
@@ -196,6 +201,7 @@ public class ShowController {
         if(result==null){
             LambdaQueryWrapper<Comments> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Comments::getNid, nid);
+            wrapper.eq(Comments::getState, 0).or().eq(Comments::getState, 1);
             result = Result.success("查询成功", commentsService.list(wrapper));
             stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
         }
@@ -228,5 +234,49 @@ public class ShowController {
 
         return Result.success("查询成功", ids.contains(nid));
 
+    }
+
+    /*
+     * 以下为管理端数据展示
+     */
+    //获取被举报的文章信息
+    @GetMapping("/getJvbao")
+    String showNovelJvbao(){
+        LambdaQueryWrapper<Novel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Novel::getState, 2);
+        return Result.success("查询成功", novelService.list(lambdaQueryWrapper));
+    }
+
+    //获取待审核的文章信息
+    @GetMapping("/getShenhe")
+    String showNovleShenhe(){
+        LambdaQueryWrapper<Novel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Novel::getState, 0);
+        return Result.success("查询成功", novelService.list(lambdaQueryWrapper));
+    }
+
+    //获取违规超过三次的用户信息
+    @GetMapping("/getUsers")
+    String showUsers(){
+        Set<String> keys = stringRedisTemplate.keys(swuu);
+        Set<Integer> uids = new HashSet<>();
+        if(keys.isEmpty())
+            return Result.success("查询成功", "");
+        else{
+            for (String key : keys) {
+                uids.add(Integer.parseInt(stringRedisTemplate.opsForValue().get(key)));
+            }
+        }
+
+        return Result.success("查询成功", userService.listByIds(uids));
+    }
+
+    //获取被举报评论
+    @GetMapping("getJvbaoComments")
+    String getJvbaoComments(){
+        LambdaQueryWrapper<Comments> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Comments::getState,1);
+
+        return Result.success("查询成功", commentsService.list(lambdaQueryWrapper));
     }
 }

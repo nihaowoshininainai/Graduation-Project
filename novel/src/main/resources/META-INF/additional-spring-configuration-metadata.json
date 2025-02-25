@@ -108,5 +108,10 @@
     "name": "show.novel.views.nid",
     "type": "java.lang.String",
     "description": "A description for 'show.novel.views.nid'"
+  },
+  {
+    "name": "show.weigui.user.uid",
+    "type": "java.lang.String",
+    "description": "A description for 'show.weigui.user.uid'"
   }
 ]}

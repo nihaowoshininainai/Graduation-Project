@@ -1,0 +1,34 @@
+{
+  "name": "sharenovelmanager-vue",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "axios": "^1.7.9",
+    "element-plus": "^2.9.5",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.0",
+    "@types/node": "^22.13.4",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "less": "^4.2.2",
+    "npm-run-all2": "^7.0.2",
+    "typescript": "~5.7.3",
+    "unplugin-auto-import": "^19.1.0",
+    "unplugin-vue-components": "^28.4.0",
+    "vite": "^6.1.0",
+    "vite-plugin-vue-devtools": "^7.7.2",
+    "vue-tsc": "^2.2.2"
+  },
+  "packageManager": "pnpm@10.2.0+sha512.0d27364e0139c6aadeed65ada153135e0ca96c8da42123bd50047f961339dc7a758fc2e944b428f52be570d1bd3372455c1c65fa2e7aa0bfbf931190f9552001"
+}
