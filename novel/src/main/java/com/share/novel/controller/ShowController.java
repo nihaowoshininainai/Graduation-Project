@@ -200,8 +200,8 @@ public class ShowController {
 
         if(result==null){
             LambdaQueryWrapper<Comments> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Comments::getNid, nid);
-            wrapper.eq(Comments::getState, 0).or().eq(Comments::getState, 1);
+            wrapper.eq(Comments::getNid, nid).and(w->w.eq(Comments::getState, 0).or().eq(Comments::getState, 1));
+            
             result = Result.success("查询成功", commentsService.list(wrapper));
             stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
         }
@@ -258,13 +258,14 @@ public class ShowController {
     //获取违规超过三次的用户信息
     @GetMapping("/getUsers")
     String showUsers(){
-        Set<String> keys = stringRedisTemplate.keys(swuu);
+        Set<String> keys = stringRedisTemplate.keys(swuu.concat("*"));
         Set<Integer> uids = new HashSet<>();
         if(keys.isEmpty())
             return Result.success("查询成功", "");
         else{
             for (String key : keys) {
-                uids.add(Integer.parseInt(stringRedisTemplate.opsForValue().get(key)));
+                if(Integer.parseInt(stringRedisTemplate.opsForValue().get(key))>=3)
+                uids.add(Integer.parseInt(key.substring(swuu.length())));
             }
         }
 

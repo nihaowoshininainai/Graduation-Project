@@ -52,3 +52,9 @@ export type CommentsLike = {
     uid:number,
     cid:number
 }
+
+export type Admin = {
+    aid?:number,
+    aname:string,
+    pwd?:string
+}

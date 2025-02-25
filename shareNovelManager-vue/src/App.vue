@@ -29,7 +29,7 @@ const currentView = computed(() => {
     return routes[path as keyof typeof routes] || NotFound
 })
 
-if (localStorage.getItem('root') === null)
+if (localStorage.getItem('admin') === null)
     window.location.href = '#/login'
 
 </script>
