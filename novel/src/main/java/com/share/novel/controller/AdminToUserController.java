@@ -16,15 +16,15 @@ import com.share.novel.service.UserService;
 
 import lombok.Data;
 
+@Data
+class AdminToUser {
+    private Admin admin;
+    private User user;
+}
+
 @RestController
 @RequestMapping("/api")
 public class AdminToUserController {
-
-    @Data
-    class AdminToUser{
-        private Admin admin;
-        private User user;
-    }
 
     @Autowired
     AdminService adminService;
@@ -32,7 +32,7 @@ public class AdminToUserController {
     @Autowired
     UserService userService;
 
-    @Autowired 
+    @Autowired
     StringRedisTemplate stringRedisTemplate;
 
     @Value("${token.uid}")
@@ -41,32 +41,30 @@ public class AdminToUserController {
     @Value("${user.id}")
     String ui;
 
-    //审核用户统一接口
+    // 审核用户统一接口
     @PostMapping("/auditUser")
-    public String audit(@RequestBody AdminToUser adminToUser){
+    public String audit(@RequestBody AdminToUser adminToUser) {
         Admin admin = adminToUser.getAdmin();
         User user = adminToUser.getUser();
 
-        //判断管理员身份
+        // 判断管理员身份
         LambdaQueryWrapper<Admin> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Admin::getAname, admin.getAname());
         lambdaQueryWrapper.eq(Admin::getPwd, admin.getPwd());
         boolean flag = adminService.exists(lambdaQueryWrapper);
 
-        if(flag){
+        if (flag) {
             boolean uflag = userService.updateById(user);
-            if(uflag){
-                
-                //删除相关小说缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys(tu+"*"));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(ui+"*"));
-                
+            if (uflag) {
+
+                // 删除相关用户缓存
+                stringRedisTemplate.delete(stringRedisTemplate.keys(tu + user.getUid() + "*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(ui + user.getUid()));
+
                 return "操作成功";
-            }
-            else 
+            } else
                 return "操作失败，请重试";
-        }
-        else
+        } else
             return "管理员密码错误";
     }
 }

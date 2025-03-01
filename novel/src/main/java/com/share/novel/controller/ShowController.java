@@ -24,6 +24,7 @@ import com.share.novel.service.CommentsService;
 import com.share.novel.service.LabelService;
 import com.share.novel.service.NovelService;
 import com.share.novel.service.UserService;
+import com.share.novel.service.impl.DeepSeekService;
 import com.share.novel.utils.RandomUtil;
 import com.share.novel.utils.Result;
 
@@ -279,5 +280,12 @@ public class ShowController {
         lambdaQueryWrapper.eq(Comments::getState,1);
 
         return Result.success("查询成功", commentsService.list(lambdaQueryWrapper));
+    }
+
+    @Autowired
+    DeepSeekService deepseek;
+    @GetMapping("ai")
+    String ai(){
+        return deepseek.chat("1+1等于几");
     }
 }

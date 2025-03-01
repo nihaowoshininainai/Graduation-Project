@@ -17,7 +17,7 @@ import com.share.novel.service.CommentsService;
 import lombok.Data;
 
 @Data
-class AdminToComments{
+class AdminToComments {
     private Admin admin;
     private Comments comments;
 }
@@ -38,31 +38,40 @@ public class AdminToCommentsController {
     @Value("${comments.nid.uid}")
     String cnu;
 
-    //审核评论统一接口
+    @Value("${show.weigui.user.uid}")
+    String swuu;
+
+    // 审核评论统一接口
     @PostMapping("/auditComments")
-    public String audit(@RequestBody AdminToComments adminToComments){
+    public String audit(@RequestBody AdminToComments adminToComments) {
         Admin admin = adminToComments.getAdmin();
         Comments comments = adminToComments.getComments();
 
-        //判断审核身份
+        // 判断审核身份
         LambdaQueryWrapper<Admin> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Admin::getAname, admin.getAname());
         lambdaQueryWrapper.eq(Admin::getPwd, admin.getPwd());
         boolean flag = adminService.exists(lambdaQueryWrapper);
 
-        if(flag){
+        if (flag) {
             boolean cflag = commentsService.updateById(comments);
-            if(cflag){
+            if (cflag) {
 
-                //删除相关小说的评论缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys(cnu+comments.getNid()+":*"));
+                // 删除相关小说的评论缓存
+                stringRedisTemplate.delete(stringRedisTemplate.keys(cnu + comments.getNid() + ":*"));
+
+                if (comments.getState() == -1) {
+                    String key = swuu + comments.getUid();
+                    if (stringRedisTemplate.opsForValue().get(key) != null) {
+                        stringRedisTemplate.opsForValue().increment(key, 1);
+                    } else
+                        stringRedisTemplate.opsForValue().set(key, "1");
+                }
 
                 return "操作成功";
-            }
-            else 
+            } else
                 return "操作失败，请重试";
-        }
-        else
+        } else
             return "管理员密码错误";
     }
 }

@@ -2,14 +2,10 @@ package com.share.novel.base;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
-import cn.hutool.json.JSONUtil;
 import lombok.Data;
 
 @Data
@@ -34,15 +30,5 @@ public class User {
         this.uname = uname;
         this.pwd = pwd;
         this.createTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-    }
-
-    @Override
-    public String toString(){
-        Map<String,String> map = new HashMap<>();
-        map.put("uid", uid.toString());
-        map.put("createTime", createTime);
-        map.put("pwd", pwd);
-        map.put("uname", uname);
-        return JSONUtil.toJsonStr(map);
     }
 }
