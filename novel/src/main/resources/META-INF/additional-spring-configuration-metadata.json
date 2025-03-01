@@ -113,5 +113,10 @@
     "name": "show.weigui.user.uid",
     "type": "java.lang.String",
     "description": "A description for 'show.weigui.user.uid'"
+  },
+  {
+    "name": "deepseek.api.key",
+    "type": "java.lang.String",
+    "description": "A description for 'deepseek.api.key'"
   }
 ]}
