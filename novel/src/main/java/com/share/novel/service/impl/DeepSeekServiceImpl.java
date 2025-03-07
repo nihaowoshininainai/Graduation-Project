@@ -12,9 +12,6 @@ import com.share.novel.service.DeepSeekService;
 
 @Service
 public class DeepSeekServiceImpl implements DeepSeekService {
-    public static final String WRITE_ME_HAIKU_ABOUT_CAT = """
-        Write me Haiku about cat,
-        haiku should start with the word cat obligatory""";
 
     private final AiClient aiClient;
 
