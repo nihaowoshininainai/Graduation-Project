@@ -118,5 +118,10 @@
     "name": "deepseek.api.key",
     "type": "java.lang.String",
     "description": "A description for 'deepseek.api.key'"
+  },
+  {
+    "name": "show.recommend.user.uid",
+    "type": "java.lang.String",
+    "description": "A description for 'show.recommend.user.uid'"
   }
 ]}
