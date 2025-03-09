@@ -107,6 +107,15 @@ public class ShowController {
         return novelService.classify(condition, sort, current, size, labelId);
     }
 
+    // 搜索小说
+    @GetMapping("/search")
+    String search(@RequestParam(required = false) String condition, @RequestParam(required = false) String sort,
+            @RequestParam("current") Integer current, @RequestParam("size") Integer size,
+            @RequestParam("name") String name) {
+                System.out.println(name);
+        return novelService.search(condition, sort, current, size, name);
+    }
+
     // 根据id查询用户名
     @GetMapping("/showUname")
     String showUname(@RequestParam("id") Integer id) {
@@ -263,15 +272,15 @@ public class ShowController {
         if (result == null) {
             LambdaQueryWrapper<Collection> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Collection::getUid, uid);
-    
+
             List<Collection> collections = collectionService.list(wrapper);
 
             LambdaQueryWrapper<Novel> novelWrapper = new LambdaQueryWrapper<>();
             novelWrapper.eq(Novel::getState, 1);
             List<Novel> allNovles = novelService.list();
 
-            Map<Integer,List<Integer>> map1 = new HashMap<>();
-            Map<Integer,List<Integer>> map2 = new HashMap<>();
+            Map<Integer, List<Integer>> map1 = new HashMap<>();
+            Map<Integer, List<Integer>> map2 = new HashMap<>();
 
             for (Collection collection : collections) {
                 LambdaQueryWrapper<NovelLabel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -297,15 +306,13 @@ public class ShowController {
             if (map1.isEmpty()) {
                 return Result.error("请先收藏小说", "");
             }
-            result = Result.success("查询成功", novelService.listByIds(JSONUtil.toList(deepseek.getRecommend(map1, map2), Integer.class)));
+            result = Result.success("查询成功",
+                    novelService.listByIds(JSONUtil.toList(deepseek.getRecommend(map1, map2), Integer.class)));
             stringRedisTemplate.opsForValue().set(key, result, 1, TimeUnit.DAYS);
         }
 
-        
-        
         return result;
     }
-
 
     /*
      * 以下为管理端数据展示

@@ -40,8 +40,13 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
     @Value("${show.novels.classify.lableId.sort.current.size}")
     String snclscs;
 
+    @Value("${show.search.name}")
+    String ssn;
+
     //获取小说通用方法
-    String getNovel(String key,String condition,String sort,Integer current,Integer size,LambdaQueryWrapper<Novel> queryWrapper){
+    String getNovel(String key,String condition,String sort,Integer current,Integer size,LambdaQueryWrapper<Novel> queryWrapper,String name){
+        if(!name.equals(""))
+            queryWrapper.like(Novel::getTitle,name);
         queryWrapper.eq(Novel::getState, 1).or().eq(Novel::getState, 2);
         SFunction<Novel, ?> orderBy = null;
         if (condition.equals(Condition.hot.name()))
@@ -60,6 +65,10 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
         stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
         
         return result;
+    }
+
+    String getNovel(String key,String condition,String sort,Integer current,Integer size,LambdaQueryWrapper<Novel> queryWrapper){
+        return getNovel(key, condition, sort, current, size, queryWrapper, "");
     }
 
     @Override
@@ -121,6 +130,20 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
             result = getNovel(key, condition, sort, current, size, novelQueryWrapper);
         }   
         
+
+        return result;
+    }
+
+    @Override
+    public String search(String condition,String sort,Integer current,Integer size,String keyword) {
+        //先在redis中查询
+        String key = ssn+keyword;
+        String result = stringRedisTemplate.opsForValue().get(key);
+
+        if(result==null){
+            LambdaQueryWrapper<Novel> queryWrapper = new LambdaQueryWrapper<>();
+            result = getNovel(key, condition, sort, current, size, queryWrapper, keyword);
+        }
 
         return result;
     }
