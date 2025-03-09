@@ -28,7 +28,7 @@ public class DeepSeekServiceImpl implements DeepSeekService {
                 {map1},
                 这是数据库中所有小说：
                 {map2}，
-                根据用户喜欢的小说和数据库中所有小说，推荐给用户2部小说，输出格式是小说id数组,不要输出其他任何字符。
+                根据用户喜欢的小说和数据库中所有小说，推荐给用户6部小说，不够6部就全部推荐出去，输出格式是小说id数组,不要输出其他任何字符。
                 """;
         PromptTemplate promptTemplate = new PromptTemplate(a);
         promptTemplate.add("map1", map1.toString());

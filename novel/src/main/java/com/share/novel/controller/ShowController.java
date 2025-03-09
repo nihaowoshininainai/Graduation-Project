@@ -1,6 +1,7 @@
 package com.share.novel.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,11 +20,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.share.novel.base.Collection;
 import com.share.novel.base.Comments;
 import com.share.novel.base.Novel;
+import com.share.novel.base.NovelLabel;
 import com.share.novel.base.User;
 import com.share.novel.service.CollectionService;
 import com.share.novel.service.CommentsService;
 import com.share.novel.service.DeepSeekService;
 import com.share.novel.service.LabelService;
+import com.share.novel.service.NovelLabelService;
 import com.share.novel.service.NovelService;
 import com.share.novel.service.UserService;
 import com.share.novel.utils.RandomUtil;
@@ -33,26 +34,16 @@ import com.share.novel.utils.Result;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import lombok.Data;
 
 @RestController
 @RequestMapping("/api")
 public class ShowController {
 
-    /**
-     * 小说id-标签id数组
-     * map1:用户喜欢的小说
-     * map2:数据库全部小说
-     * 
-     */
-    @Data
-    public class Recommend {
-        private Map<Integer, List<Integer>> map1;
-        private Map<Integer, List<Integer>> map2;
-    }
-
     @Autowired
     NovelService novelService;
+
+    @Autowired
+    NovelLabelService novelLabelService;
 
     @Autowired
     UserService userService;
@@ -263,19 +254,58 @@ public class ShowController {
     }
 
     // 获取用户推荐
-    @PostMapping("/showRecommend")
-    String showRecommend(@RequestBody Recommend recommend, @RequestParam("uid") Integer uid) {
+    @GetMapping("/showRecommend")
+    String showRecommend(@RequestParam("uid") Integer uid) {
         // 查询redis中是否存有缓存
         String key = sruu + uid;
         String result = stringRedisTemplate.opsForValue().get(key);
 
         if (result == null) {
-            result = deepseek.getRecommend(recommend.getMap1(), recommend.getMap2());
+            LambdaQueryWrapper<Collection> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Collection::getUid, uid);
+    
+            List<Collection> collections = collectionService.list(wrapper);
+
+            LambdaQueryWrapper<Novel> novelWrapper = new LambdaQueryWrapper<>();
+            novelWrapper.eq(Novel::getState, 1);
+            List<Novel> allNovles = novelService.list();
+
+            Map<Integer,List<Integer>> map1 = new HashMap<>();
+            Map<Integer,List<Integer>> map2 = new HashMap<>();
+
+            for (Collection collection : collections) {
+                LambdaQueryWrapper<NovelLabel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                lambdaQueryWrapper.eq(NovelLabel::getNid, collection.getNid());
+                List<NovelLabel> novelLabels = novelLabelService.list(lambdaQueryWrapper);
+                List<Integer> list = new ArrayList<>();
+                for (NovelLabel novelLabel : novelLabels) {
+                    list.add(novelLabel.getLid());
+                }
+                map1.put(collection.getNid(), list);
+            }
+
+            for (Novel novel : allNovles) {
+                LambdaQueryWrapper<NovelLabel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                lambdaQueryWrapper.eq(NovelLabel::getNid, novel.getId());
+                List<NovelLabel> novelLabels = novelLabelService.list(lambdaQueryWrapper);
+                List<Integer> list = new ArrayList<>();
+                for (NovelLabel novelLabel : novelLabels) {
+                    list.add(novelLabel.getLid());
+                }
+                map2.put(novel.getId(), list);
+            }
+            if (map1.isEmpty()) {
+                return Result.error("请先收藏小说", "");
+            }
+            result = Result.success("查询成功", novelService.listByIds(JSONUtil.toList(deepseek.getRecommend(map1, map2), Integer.class)));
             stringRedisTemplate.opsForValue().set(key, result, 1, TimeUnit.DAYS);
         }
 
+        
+        
         return result;
     }
+
 
     /*
      * 以下为管理端数据展示
