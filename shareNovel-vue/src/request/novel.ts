@@ -99,3 +99,12 @@ export const reportNovel = (novel: Novel) => {
     )
 
 }
+
+//获取小说推荐
+export const getNovelRecommend = (uid: number) => {
+    return request.get("showRecommend", {
+        params: {
+            uid: uid
+        }
+    })
+}
