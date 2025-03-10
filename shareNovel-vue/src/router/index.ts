@@ -87,6 +87,16 @@ const router = createRouter({
     name: '小说界面',
     props: true,
     component: () => import('@/views/NovelView.vue')
+  },
+  {
+    path: '/search/:page',
+    name: '搜索界面',
+    props: (route) => {
+      return {
+        name: route.query.name
+      }
+    },
+    component: () => import('@/views/SearchView.vue')
   }
   ],
 })

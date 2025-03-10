@@ -13,10 +13,12 @@
                 <el-link>推荐</el-link>
             </RouterLink>
         </el-col>
-        <el-col :span="6">
-            搜索
+        <el-col :span="6" style="display: flex;">
+            <el-input size="small" placeholder="请输入内容" v-model="input"></el-input>
+            <el-button type="primary" size="small" :disabled="input === ''"
+                @click="router.push('/search/1?name=' + input)">搜索</el-button>
         </el-col>
-        <el-col :span="6" v-if="!(cookie.length !== 0)" style="display: flex;">
+        <el-col :span="6" v-if="!(cookie.length !== 0)" style="display: flex;justify-content: center;">
             <RouterLink to="/login">
                 <el-link>登录</el-link>
             </RouterLink>
@@ -37,16 +39,19 @@
 <script setup lang="ts">
 import type { User } from '@/baseType';
 import router from '@/router';
+import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
 
 const cookie = document.cookie
 const user: User = JSON.parse(window.localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) || '{}') as User;
 
-const loginOut = ()=>{
+const loginOut = () => {
     window.localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
     document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
     router.go(0)
 }
+
+const input = ref('')
 </script>
 <style lang="less" scoped>
 .el-row {
@@ -56,6 +61,4 @@ const loginOut = ()=>{
         text-align: center;
     }
 }
-
-
 </style>

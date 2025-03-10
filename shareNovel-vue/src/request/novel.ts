@@ -3,7 +3,7 @@ import request from "."
 import router from "@/router"
 
 //获取小说
-export const getIndexNovel = (current: number, size: number, condition?: string, sort?: string, labelId?: number) => {
+export const getIndexNovel = (current: number, size: number, condition?: string, sort?: string, labelId?: number, name?: string) => {
     if (labelId && labelId !== -1) {
         return request.get('classify', {
             params: {
@@ -12,6 +12,17 @@ export const getIndexNovel = (current: number, size: number, condition?: string,
                 condition,
                 sort,
                 labelId
+            }
+        })
+    }
+    else if (name) {
+        return request.get('search', {
+            params: {
+                current,
+                size,
+                condition,
+                sort,
+                name
             }
         })
     }
@@ -85,7 +96,7 @@ export const getNovelDetail = (novelId: number) => {
 
 //举报小说
 export const reportNovel = (novel: Novel) => {
-    if(document.cookie===""){
+    if (document.cookie === "") {
         ElMessage.error("请先登录")
         return
     }

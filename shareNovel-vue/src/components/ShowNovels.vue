@@ -10,7 +10,8 @@ import { useRoute } from 'vue-router';
 
 const props = defineProps<{
     labels?: Label[],
-    currentLabel?: number
+    currentLabel?: number,
+    name?: string
 }>()
 const currentLabel = ref(props.currentLabel)
 const pageCount = ref(0)
@@ -20,8 +21,8 @@ const novel = ref<Novel[]>([])
 const unames = ref<string[]>([])
 const condition = ref<Condition>(Condition.hot)
 const sort = ref<Sort>(Sort.desc)
-const getData = (labelId?:number) => {
-    getIndexNovel(current.value, import.meta.env.VITE_PAGE_SIZE, Condition[condition.value], Sort[sort.value], labelId).then((result) => {
+const getData = (labelId?: number) => {
+    getIndexNovel(current.value, import.meta.env.VITE_PAGE_SIZE, Condition[condition.value], Sort[sort.value], labelId, props.name).then((result) => {
         if (import.meta.env.DEV) {
             console.log(result.data.data)
             console.log(Condition[condition.value]);
@@ -65,11 +66,11 @@ getData()
 <template>
     <div class="classify" v-if="currentLabel">
         <div>
-            <el-button :type="currentLabel === -1 ? 'primary' : ''" @click="currentLabel = -1;getData()">全部</el-button>
+            <el-button :type="currentLabel === -1 ? 'primary' : ''" @click="currentLabel = -1; getData()">全部</el-button>
         </div>
         <div v-for="label in labels" :key="label.id">
             <el-button :type="currentLabel === label.id ? 'primary' : ''"
-                @click="currentLabel = label.id;getData(label.id)">{{ label.name }}</el-button>
+                @click="currentLabel = label.id; getData(label.id)">{{ label.name }}</el-button>
         </div>
     </div>
     <el-row>
@@ -80,8 +81,10 @@ getData()
                 @click="condition = Condition.time; getData(currentLabel)">按时间</el-button>
         </el-col>
         <el-col :span="12">
-            <el-button :type="sort === Sort.asc ? 'primary' : ''" @click="sort = Sort.asc; getData(currentLabel)">升序</el-button>
-            <el-button :type="sort === Sort.desc ? 'primary' : ''" @click="sort = Sort.desc; getData(currentLabel)">降序</el-button>
+            <el-button :type="sort === Sort.asc ? 'primary' : ''"
+                @click="sort = Sort.asc; getData(currentLabel)">升序</el-button>
+            <el-button :type="sort === Sort.desc ? 'primary' : ''"
+                @click="sort = Sort.desc; getData(currentLabel)">降序</el-button>
         </el-col>
     </el-row>
     <div class="common-layout">
@@ -133,12 +136,14 @@ getData()
     display: flex;
     justify-content: center;
 }
-.classify{
+
+.classify {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     margin-bottom: 10px;
-    .el-button{
+
+    .el-button {
         margin: 10px;
     }
 }
