@@ -112,7 +112,6 @@ public class ShowController {
     String search(@RequestParam(required = false) String condition, @RequestParam(required = false) String sort,
             @RequestParam("current") Integer current, @RequestParam("size") Integer size,
             @RequestParam("name") String name) {
-                System.out.println(name);
         return novelService.search(condition, sort, current, size, name);
     }
 
@@ -276,8 +275,8 @@ public class ShowController {
             List<Collection> collections = collectionService.list(wrapper);
 
             LambdaQueryWrapper<Novel> novelWrapper = new LambdaQueryWrapper<>();
-            novelWrapper.eq(Novel::getState, 1);
-            List<Novel> allNovles = novelService.list();
+            novelWrapper.eq(Novel::getState, 1).eq(Novel::getState, 2);
+            List<Novel> allNovles = novelService.list(novelWrapper);
 
             Map<Integer, List<Integer>> map1 = new HashMap<>();
             Map<Integer, List<Integer>> map2 = new HashMap<>();

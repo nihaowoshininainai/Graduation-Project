@@ -35,6 +35,9 @@ public class UserToCollectionController {
     @Value("${collection.uid.nid}")
     String cun;
 
+    @Value("${collections.uid}")
+    String cu;
+
     @Value("${show.novel.like.uid}")
     String snl;
 
@@ -53,6 +56,7 @@ public class UserToCollectionController {
                 
                 //删除查找该用户的收藏缓存
                 stringRedisTemplate.delete(stringRedisTemplate.keys(cun+uid+"*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(cu+uid+"*"));
                 stringRedisTemplate.delete(stringRedisTemplate.keys(snl+uid+"*"));
                 stringRedisTemplate.delete(stringRedisTemplate.keys(snlu+uid+"*"));
 
@@ -79,6 +83,7 @@ public class UserToCollectionController {
                 
                 //删除查找该用户的收藏缓存
                 stringRedisTemplate.delete(stringRedisTemplate.keys(cun+uid+"*"));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(cu+uid+"*"));
                 stringRedisTemplate.delete(stringRedisTemplate.keys(snl+uid+"*"));
                 stringRedisTemplate.delete(stringRedisTemplate.keys(snlu+uid+"*"));
 

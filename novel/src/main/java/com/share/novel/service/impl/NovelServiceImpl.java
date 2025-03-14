@@ -45,9 +45,10 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
 
     //获取小说通用方法
     String getNovel(String key,String condition,String sort,Integer current,Integer size,LambdaQueryWrapper<Novel> queryWrapper,String name){
+        
+        queryWrapper.or(w->w.eq(Novel::getState, 1).or(q->q.eq(Novel::getState, 2)));
         if(!name.equals(""))
-            queryWrapper.like(Novel::getTitle,name);
-        queryWrapper.eq(Novel::getState, 1).or().eq(Novel::getState, 2);
+            queryWrapper.and(q -> q.like(Novel::getTitle, name));
         SFunction<Novel, ?> orderBy = null;
         if (condition.equals(Condition.hot.name()))
             orderBy = Novel::getViews;
