@@ -14,9 +14,9 @@
             </RouterLink>
         </el-col>
         <el-col :span="6" style="display: flex;">
-            <el-input size="small" placeholder="请输入内容" v-model="input"></el-input>
+            <el-input size="small" placeholder="请输入内容" v-model="input" @keydown.enter="search"></el-input>
             <el-button type="primary" size="small" :disabled="input === ''"
-                @click="router.push('/search/1?name=' + input)">搜索</el-button>
+                @click="search">搜索</el-button>
         </el-col>
         <el-col :span="6" v-if="!(cookie.length !== 0)" style="display: flex;justify-content: center;">
             <RouterLink to="/login">
@@ -52,6 +52,11 @@ const loginOut = () => {
 }
 
 const input = ref('')
+
+const search = () => {
+    router.push('/search/1?name=' + input.value) 
+    input.value = ''
+}
 </script>
 <style lang="less" scoped>
 .el-row {

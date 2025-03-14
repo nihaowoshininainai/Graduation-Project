@@ -9,7 +9,7 @@
                     </span>
                 </div>
             </template>
-            <el-text>{{ item.content }}</el-text>
+            <el-text v-html="item.content" style="height: 189px;display: block;overflow: hidden;"></el-text>
             <template #footer>
                 <div>
                     <span>{{ item.createTime }}</span>

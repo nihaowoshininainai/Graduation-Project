@@ -96,12 +96,12 @@ getData()
                     </span>
                 </div>
             </template>
-            <el-text>{{ item.content }}</el-text>
+            <el-text v-html="item.content" style="height: 189px;display: block;overflow: hidden;"></el-text>
             <template #footer>
-                <div>
+                <div style="display: flex;justify-content: space-around;">
                     <span>{{ item.createTime }}</span>
                     <span @click="goToUser(item.uid as number)">
-                        <el-link>{{ unames[index] }}</el-link>
+                        作者:<el-link>{{ unames[index] }}</el-link>
                     </span>
                 </div>
             </template>

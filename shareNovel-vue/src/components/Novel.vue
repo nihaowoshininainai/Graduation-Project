@@ -4,9 +4,9 @@
         <el-col>
             <h2>{{ novel?.title }}</h2>
         </el-col>
-        <el-col>
-            <el-text style="cursor: pointer;" @click="router.push(`/user/${novel?.uid}`)">作者：{{ uname }}</el-text>
-            <el-text>创作时间：{{ novel?.createTime }}</el-text>
+        <el-col class="novelMessage">
+            <el-text style="cursor: pointer;" @click="router.push(`/user/${novel?.uid}`)">作者:{{ uname }}</el-text>
+            <el-text>创作时间:{{ novel?.createTime }}</el-text>
             <el-text style="cursor: pointer;">
                 <svg @click="addLike(novel as Novel)" v-show="!isLike" xmlns="http://www.w3.org/2000/svg" width="21"
                     height="21" viewBox="0 0 26 26">
@@ -19,10 +19,10 @@
                         d="M17.869 3.889c-2.096 0-3.887 1.494-4.871 2.524c-.984-1.03-2.771-2.524-4.866-2.524C4.521 3.889 2 6.406 2 10.009c0 3.97 3.131 6.536 6.16 9.018c1.43 1.173 2.91 2.385 4.045 3.729c.191.225.471.355.765.355h.058c.295 0 .574-.131.764-.355c1.137-1.344 2.616-2.557 4.047-3.729C20.867 16.546 24 13.98 24 10.009c0-3.603-2.521-6.12-6.131-6.12" />
                 </svg>
             </el-text>
-            <el-text>浏览量：{{ novel?.views }}</el-text>
-            <el-text style="cursor: pointer;" @click="reportNovel(novel as Novel)">举报</el-text>
+            <el-text>浏览量:{{ novel?.views }}</el-text>
+            <el-text type="danger" style="cursor: pointer;" @click="reportNovel(novel as Novel)">举报</el-text>
         </el-col>
-        <el-col v-html="novel?.content"></el-col>
+        <el-col v-html="novel?.content" style="text-align: left;"></el-col>
     </el-row>
 </template>
 <script setup lang="ts">
@@ -38,8 +38,8 @@ const props = defineProps<{
     nid: number
 }>()
 
-let novelsId:number[] = []
-const isExist = localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL_VIEW )
+let novelsId: number[] = []
+const isExist = localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL_VIEW)
 if (isExist) {
     novelsId = JSON.parse(isExist) as number[]
     if (!novelsId.includes(props.nid)) {
@@ -48,7 +48,7 @@ if (isExist) {
         localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL_VIEW, JSON.stringify(novelsId))
     }
 }
-else{
+else {
     addView(props.nid)
     novelsId.push(props.nid)
     localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL_VIEW, JSON.stringify(novelsId))
@@ -124,8 +124,8 @@ function disLike(novel: Novel) {
             ElMessage.error({
                 message: result.message,
                 duration: 2000,
-                onClose:()=>{
-                    if(result.message === import.meta.env.VITE_MESSAGE_RELOGIN){
+                onClose: () => {
+                    if (result.message === import.meta.env.VITE_MESSAGE_RELOGIN) {
                         localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
                         document.cookie += ";max-age=0"
                         router.push('/login')
@@ -137,5 +137,12 @@ function disLike(novel: Novel) {
 }
 </script>
 <style lang="less" scoped>
-
+.el-col{
+    margin-bottom: 10px;
+    text-align: center;
+    .novelMessage{
+        display: flex;
+        justify-content: space-around;
+    }
+}
 </style>

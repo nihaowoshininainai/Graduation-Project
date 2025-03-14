@@ -8,7 +8,7 @@
         </el-col>
         <el-col style="justify-content: left;" v-for="comment in comments" :key="comment.id">
             <el-row style="width: 100%;border: 1px solid #ccc;margin-top: 10px;padding: 10px;">
-                <el-col style="justify-content: left;">{{ comment.uid }}</el-col>
+                <el-col style="justify-content: left;">来自用户“{{ comment.uid }}”的评论：</el-col>
                 <el-col style="justify-content: left;">{{ comment.content }}</el-col>
                 <el-col>
                     <svg v-show="!ifLike.get(comment.id as number)" @click="addLike(comment.id as number)"
@@ -95,9 +95,7 @@ const addCom = () => {
                     message: result.message,
                     duration: 1000,
                     onClose: () => {
-                        localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
-                        document.cookie += ";max-age=0"
-                        router.push('/login')
+                        input.value = ''
                     }
                 })
             else {
@@ -148,3 +146,8 @@ const reportButton = (comments:Comments)=>{
 }
 getCom()
 </script>
+<style lang="less" scoped>
+.el-col{
+    margin-bottom: 10px;
+}
+</style>
