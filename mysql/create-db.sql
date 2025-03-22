@@ -1,2 +1,0 @@
-CREATE DATABASE shareNovel
-    DEFAULT CHARACTER SET = 'utf8mb4';
