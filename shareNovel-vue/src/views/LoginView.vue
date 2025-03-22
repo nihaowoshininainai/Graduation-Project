@@ -1,17 +1,21 @@
 <!-- 这是登陆界面 -->
 <template>
-    <el-form ref="userFormRef" :model="user" :rules="rules">
-        <el-form-item label="用户名" prop="uname">
-            <el-input v-model="user.uname" placeholder="请输入用户名"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" prop="pwd">
-            <el-input v-model="user.pwd" type="password" placeholder="请输入密码"
-                @keydown.enter="loginForm(userFormRef)"></el-input>
-        </el-form-item>
-        <el-form-item>
-            <el-button type="primary" @click="loginForm(userFormRef)">登录</el-button>
-        </el-form-item>
-    </el-form>
+    <div class="login">
+        <div class="left"></div>
+        <el-form ref="userFormRef" :model="user" :rules="rules" label-width="auto">
+            <h2>用户登录</h2>
+            <el-form-item label="用户名" prop="uname">
+                <el-input v-model="user.uname" placeholder="请输入用户名"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="pwd">
+                <el-input v-model="user.pwd" type="password" placeholder="请输入密码"
+                    @keydown.enter="loginForm(userFormRef)"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="loginForm(userFormRef)">登录</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
 </template>
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
@@ -68,3 +72,27 @@ const loginForm = (formEl: FormInstance | undefined) => {
     })
 }
 </script>
+<style lang="less" scoped>
+.login{
+    width: 70%;
+    margin: 200px auto;
+    border-radius: 10px;
+    border-style: solid;
+    border-width: 1px;
+    height: 400px;
+    display: flex;
+    overflow: hidden;
+    .left{
+        width: 40%;
+        background-image: url('/imgs/1.png');
+        background-size: cover;
+        border-right: 1px solid;
+    }
+    .el-form{
+        text-align: center;
+        padding: 10px;
+        margin: 60px auto;
+
+    }
+}
+</style>

@@ -1,20 +1,24 @@
 <!-- 这是注册界面 -->
 <template>
-    <el-form ref="userFormRef" :model="user" :rules="rules">
-        <el-form-item label="用户名" prop="username">
-            <el-input v-model="user.username" placeholder="请输入用户名"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" prop="password">
-            <el-input v-model="user.password" type="password" placeholder="请输入密码"></el-input>
-        </el-form-item>
-        <el-form-item label="确认密码" prop="repeatPassword">
-            <el-input type="password" v-model="user.repeatPassword" placeholder="请再次输入密码"
-                @keydown.enter="registerForm(userFormRef)"></el-input>
-        </el-form-item>
-        <el-form-item>
-            <el-button type="primary" @click="registerForm(userFormRef)">注册</el-button>
-        </el-form-item>
-    </el-form>
+    <div class="register">
+        <div class="left"></div>
+        <el-form ref="userFormRef" :model="user" :rules="rules" label-width="auto">
+            <h2>注册</h2>
+            <el-form-item label="用户名" prop="username">
+                <el-input v-model="user.username" placeholder="请输入用户名"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="password">
+                <el-input v-model="user.password" type="password" placeholder="请输入密码"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码" prop="repeatPassword">
+                <el-input type="password" v-model="user.repeatPassword" placeholder="请再次输入密码"
+                    @keydown.enter="registerForm(userFormRef)"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="registerForm(userFormRef)">注册</el-button>
+            </el-form-item>
+        </el-form>
+    </div>
 </template>
 <script setup lang="ts">
 import { type FormRules, type FormInstance } from 'element-plus';
@@ -104,3 +108,27 @@ const registerForm = (formEl: FormInstance | undefined) => {
     })
 }
 </script>
+<style lang="less" scoped>
+.register {
+    width: 70%;
+    margin: 200px auto;
+    border-radius: 10px;
+    border-style: solid;
+    border-width: 1px;
+    height: 400px;
+    display: flex;
+    overflow: hidden;
+    .left{
+        width: 40%;
+        background-image: url('/imgs/1.png');
+        background-size: cover;
+        border-right: 1px solid;
+    }
+    .el-form{
+        text-align: center;
+        padding: 10px;
+        margin: 60px auto;
+
+    }
+}
+</style>

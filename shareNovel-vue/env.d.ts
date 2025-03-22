@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
 interface ImportMetaEnv {
-    readonly VITE_BASE_URL: string
     readonly VITE_PAGE_SIZE: number
     readonly VITE_LOCALSTORAGE_USER: string
     readonly VITE_MESSAGE_RELOGIN: string

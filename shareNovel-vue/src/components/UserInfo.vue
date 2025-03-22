@@ -1,6 +1,6 @@
 <!-- 用户信息 -->
 <template>
-<el-descriptions>
+<el-descriptions border>
 <el-descriptions-item label="用户名">{{ user.uname }}</el-descriptions-item>
 <el-descriptions-item label="用户id">{{ user.uid }}</el-descriptions-item>
 <el-descriptions-item label="注册时间">{{ user.createTime }}</el-descriptions-item>

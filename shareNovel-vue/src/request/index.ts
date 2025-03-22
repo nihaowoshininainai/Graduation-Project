@@ -1,6 +1,6 @@
 import axios from "axios";
 
 const request = axios
-request.defaults.baseURL=import.meta.env.VITE_BASE_URL
+request.defaults.baseURL='/api'
 
 export default request

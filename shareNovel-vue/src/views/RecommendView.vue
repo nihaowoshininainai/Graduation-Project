@@ -11,10 +11,10 @@
             </template>
             <el-text v-html="item.content" style="height: 189px;display: block;overflow: hidden;"></el-text>
             <template #footer>
-                <div>
+                <div style="display: flex;justify-content: space-around;">
                     <span>{{ item.createTime }}</span>
                     <span @click="router.push(`/user/${item.uid}`)">
-                        <el-link>{{ unames[index] }}</el-link>
+                        作者:<el-link>{{ unames[index] }}</el-link>
                     </span>
                 </div>
             </template>
@@ -30,11 +30,10 @@ import { getUname } from '@/request/user';
 
 const novel = ref<Novel[]>([]);
 const user: User = JSON.parse(localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) as string)
-const uid = user.uid as number
 const unames = ref<string[]>([])
 
 const getDate = () => {
-    getNovelRecommend(uid).then(res => {
+    getNovelRecommend(user.uid as number).then(res => {
         const result: Result = res.data
         novel.value = result.data
         novel.value.forEach((element, index) => {
@@ -49,7 +48,10 @@ const getDate = () => {
     )
 }
 
-getDate()
+if (user !== null)
+    getDate()
+else
+    ElMessage.warning('请先登录')
 </script>
 <style scoped>
 .common-layout {
