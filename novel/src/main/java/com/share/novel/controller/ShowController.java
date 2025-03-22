@@ -275,7 +275,7 @@ public class ShowController {
             List<Collection> collections = collectionService.list(wrapper);
 
             LambdaQueryWrapper<Novel> novelWrapper = new LambdaQueryWrapper<>();
-            novelWrapper.eq(Novel::getState, 1).eq(Novel::getState, 2);
+            novelWrapper.eq(Novel::getState, 1).or().eq(Novel::getState, 2);
             List<Novel> allNovles = novelService.list(novelWrapper);
 
             Map<Integer, List<Integer>> map1 = new HashMap<>();
