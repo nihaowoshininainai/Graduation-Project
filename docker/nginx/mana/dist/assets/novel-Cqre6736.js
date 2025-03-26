@@ -1,0 +1,1 @@
+import{r as a}from"./el-message-CVeCEcYN.js";const o=a.get("getJvbao"),r=a.get("getShenhe"),n=(s,t)=>(t.state=1,a.post("auditNovel",{novel:t,admin:s})),p=(s,t)=>(t.state=-1,a.post("auditNovel",{novel:t,admin:s})),g=(s,t)=>(t.state=3,a.post("auditNovel",{novel:t,admin:s}));export{r as a,o as g,g as j,p as n,n as p};
