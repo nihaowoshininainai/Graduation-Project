@@ -37,11 +37,12 @@ if (localStorage.getItem('admin') === null)
 <template>
 
     <el-container>
-        <el-header>
+        <el-header style="border-bottom: 1px solid #ccc;">
             <Header></Header>
         </el-header>
         <el-container>
-            <el-aside width="200px"><el-menu>
+            <el-aside width="200px">
+                <el-menu style="height: 80vh;">
                     <el-menu-item index="1">
                         <el-link :underline="false" href="#/">
                             <el-icon>
@@ -70,7 +71,8 @@ if (localStorage.getItem('admin') === null)
                             </el-icon>评论管理
                         </el-link>
                     </el-menu-item>
-                </el-menu></el-aside>
+                </el-menu>
+            </el-aside>
             <el-main>
                 <component :is="currentView"></component>
             </el-main>
