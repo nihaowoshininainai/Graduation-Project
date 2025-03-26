@@ -22,8 +22,8 @@ public class AdminController {
 
     //登陆
     @PostMapping("/alogin")
-    public String login(String aname,String pwd) {
-        return adminService.login(aname, pwd);
+    public String login(@RequestBody Admin admin) {
+        return adminService.login(admin.getAname(),admin.getPwd());
     }
 
     //添加管理员
