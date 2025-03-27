@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.share.novel.service.DeepSeekService;
 
-
 @Service
 public class DeepSeekServiceImpl implements DeepSeekService {
 
@@ -22,7 +21,7 @@ public class DeepSeekServiceImpl implements DeepSeekService {
     // 构造函数
 
     @Override
-    public String getRecommend(Map<Integer,List<Integer>> map1, Map<Integer,List<Integer>> map2) {
+    public String getRecommend(Map<Integer, List<Integer>> map1, Map<Integer, List<Integer>> map2) {
         String a = """
                 这是用户喜欢的小说：
                 {map1},
@@ -36,4 +35,16 @@ public class DeepSeekServiceImpl implements DeepSeekService {
 
         return aiClient.generate(promptTemplate.create().getContents());
     }
+
+    @Override
+    public Object getLock(int userId){
+        Object lock = DeepSeekService.map.get(userId);
+        if(lock == null){
+            lock = new Object();
+            DeepSeekService.map.put(userId, lock);
+        }
+
+        return lock;
+    } 
+
 }

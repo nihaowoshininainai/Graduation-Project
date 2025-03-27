@@ -268,46 +268,49 @@ public class ShowController {
         String key = sruu + uid;
         String result = stringRedisTemplate.opsForValue().get(key);
 
-        if (result == null) {
-            LambdaQueryWrapper<Collection> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Collection::getUid, uid);
+        synchronized (deepseek.getLock(uid)) {
+            result = stringRedisTemplate.opsForValue().get(key);
+            if (result == null) {
+                LambdaQueryWrapper<Collection> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(Collection::getUid, uid);
 
-            List<Collection> collections = collectionService.list(wrapper);
+                List<Collection> collections = collectionService.list(wrapper);
 
-            LambdaQueryWrapper<Novel> novelWrapper = new LambdaQueryWrapper<>();
-            novelWrapper.eq(Novel::getState, 1).or().eq(Novel::getState, 2);
-            List<Novel> allNovles = novelService.list(novelWrapper);
+                LambdaQueryWrapper<Novel> novelWrapper = new LambdaQueryWrapper<>();
+                novelWrapper.eq(Novel::getState, 1).or().eq(Novel::getState, 2);
+                List<Novel> allNovles = novelService.list(novelWrapper);
 
-            Map<Integer, List<Integer>> map1 = new HashMap<>();
-            Map<Integer, List<Integer>> map2 = new HashMap<>();
+                Map<Integer, List<Integer>> map1 = new HashMap<>();
+                Map<Integer, List<Integer>> map2 = new HashMap<>();
 
-            for (Collection collection : collections) {
-                LambdaQueryWrapper<NovelLabel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-                lambdaQueryWrapper.eq(NovelLabel::getNid, collection.getNid());
-                List<NovelLabel> novelLabels = novelLabelService.list(lambdaQueryWrapper);
-                List<Integer> list = new ArrayList<>();
-                for (NovelLabel novelLabel : novelLabels) {
-                    list.add(novelLabel.getLid());
+                for (Collection collection : collections) {
+                    LambdaQueryWrapper<NovelLabel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                    lambdaQueryWrapper.eq(NovelLabel::getNid, collection.getNid());
+                    List<NovelLabel> novelLabels = novelLabelService.list(lambdaQueryWrapper);
+                    List<Integer> list = new ArrayList<>();
+                    for (NovelLabel novelLabel : novelLabels) {
+                        list.add(novelLabel.getLid());
+                    }
+                    map1.put(collection.getNid(), list);
                 }
-                map1.put(collection.getNid(), list);
-            }
 
-            for (Novel novel : allNovles) {
-                LambdaQueryWrapper<NovelLabel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-                lambdaQueryWrapper.eq(NovelLabel::getNid, novel.getId());
-                List<NovelLabel> novelLabels = novelLabelService.list(lambdaQueryWrapper);
-                List<Integer> list = new ArrayList<>();
-                for (NovelLabel novelLabel : novelLabels) {
-                    list.add(novelLabel.getLid());
+                for (Novel novel : allNovles) {
+                    LambdaQueryWrapper<NovelLabel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                    lambdaQueryWrapper.eq(NovelLabel::getNid, novel.getId());
+                    List<NovelLabel> novelLabels = novelLabelService.list(lambdaQueryWrapper);
+                    List<Integer> list = new ArrayList<>();
+                    for (NovelLabel novelLabel : novelLabels) {
+                        list.add(novelLabel.getLid());
+                    }
+                    map2.put(novel.getId(), list);
                 }
-                map2.put(novel.getId(), list);
+                if (map1.isEmpty()) {
+                    return Result.error("请先收藏小说", "");
+                }
+                result = Result.success("查询成功",
+                        novelService.listByIds(JSONUtil.toList(deepseek.getRecommend(map1, map2), Integer.class)));
+                stringRedisTemplate.opsForValue().set(key, result, 1, TimeUnit.DAYS);
             }
-            if (map1.isEmpty()) {
-                return Result.error("请先收藏小说", "");
-            }
-            result = Result.success("查询成功",
-                    novelService.listByIds(JSONUtil.toList(deepseek.getRecommend(map1, map2), Integer.class)));
-            stringRedisTemplate.opsForValue().set(key, result, 1, TimeUnit.DAYS);
         }
 
         return result;
