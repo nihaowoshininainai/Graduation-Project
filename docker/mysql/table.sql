@@ -114,6 +114,19 @@ CREATE TABLE `Label` (
 -- Table structure for table `Novel`
 --
 
+INSERT INTO `Label` VALUES
+(11,'其他'),
+(10,'儿童文学'),
+(9,'历史小说'),
+(8,'奇幻小说'),
+(7,'悬疑小说'),
+(6,'惊悚小说'),
+(5,'武侠小说'),
+(4,'浪漫主义小说'),
+(3,'现实主义小说'),
+(2,'科幻小说'),
+(1,'言情小说');
+
 DROP TABLE IF EXISTS `Novel`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;

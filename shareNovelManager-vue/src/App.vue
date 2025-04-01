@@ -42,7 +42,7 @@ if (localStorage.getItem('admin') === null)
         </el-header>
         <el-container>
             <el-aside width="200px">
-                <el-menu style="height: 80vh;">
+                <el-menu style="height: 90vh;">
                     <el-menu-item index="1">
                         <el-link :underline="false" href="#/">
                             <el-icon>
