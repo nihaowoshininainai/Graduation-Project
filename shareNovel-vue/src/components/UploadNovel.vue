@@ -1,6 +1,6 @@
 <!-- 上传小说 -->
 <template>
-  <el-button :disabled="tiltle === '' || valueHtml === ''">暂存</el-button>
+  <el-button :disabled="tiltle === '' || valueHtml === ''" @click="storeNovel">暂存</el-button>
   <el-button type="primary" :disabled="tiltle === '' || valueHtml === ''" @click="uploadNovel">上传</el-button>
   <el-button type="danger" @click="drawer = true">添加标签</el-button>
   <el-tag type="primary" v-for="label in addLabels" :key="label.id" closable @close="removeLabel(label)">{{ label.name
@@ -113,6 +113,10 @@ function uploadNovel() {
       novel: novel
     }).then(res => {
       if (res.state === '1') {
+        tiltle.value = ''
+        valueHtml.value = ''
+        localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL)
+
         if (addLabels.value.length > 0) {
           const novelLabelList: NovelLabel[] = []
           addLabels.value.forEach((label) => {
@@ -124,8 +128,10 @@ function uploadNovel() {
           })
           uploadNovelLabels(novelLabelList).then(res => {
             const result: Result = res.data
-            if (result.state === '1')
+            if (result.state === '1') {
+              addLabels.value = []
               ElMessage.success(result.message)
+            }
             else
               ElMessage.error(result.message)
           })
@@ -138,5 +144,13 @@ function uploadNovel() {
       message: '已取消上传'
     })
   })
+}
+
+function storeNovel() {
+  const novel: Novel = {
+    title: tiltle.value,
+    content: valueHtml.value
+  }
+  localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL, JSON.stringify(novel))
 }
 </script>
