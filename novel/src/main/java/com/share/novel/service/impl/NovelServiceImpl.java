@@ -1,5 +1,7 @@
 package com.share.novel.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +48,7 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
     //获取小说通用方法
     String getNovel(String key,String condition,String sort,Integer current,Integer size,LambdaQueryWrapper<Novel> queryWrapper,String name){
         
-        queryWrapper.or(w->w.eq(Novel::getState, 1).or(q->q.eq(Novel::getState, 2)));
+        queryWrapper.in(Novel::getState, Arrays.asList(1,2));
         if(!name.equals(""))
             queryWrapper.and(q -> q.like(Novel::getTitle, name));
         SFunction<Novel, ?> orderBy = null;
@@ -124,9 +126,11 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
                 return Result.error("该标签下没有小说", "");
 
             LambdaQueryWrapper<Novel> novelQueryWrapper = new LambdaQueryWrapper<>();
+            List<Integer> nids = new ArrayList<>();
             for (NovelLabel novelLabel : list) {
-                novelQueryWrapper.eq(Novel::getId, novelLabel.getNid());
+                nids.add(novelLabel.getNid());
             }
+            novelQueryWrapper.in(Novel::getId, nids);
 
             result = getNovel(key, condition, sort, current, size, novelQueryWrapper);
         }   
