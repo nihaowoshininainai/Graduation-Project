@@ -35,15 +35,19 @@ const unames = ref<string[]>([])
 const getDate = () => {
     getNovelRecommend(user.uid as number).then(res => {
         const result: Result = res.data
-        novel.value = result.data
-        novel.value.forEach((element, index) => {
-            getUname(element.uid as number).then((result) => {
-                if (import.meta.env.DEV) {
-                    console.log(result)
-                }
-                unames.value[index] = result.data.data
+        if (result.state === '1') {
+            novel.value = result.data
+            novel.value.forEach((element, index) => {
+                getUname(element.uid as number).then((result) => {
+                    if (import.meta.env.DEV) {
+                        console.log(result)
+                    }
+                    unames.value[index] = result.data.data
+                })
             })
-        })
+        }
+        else
+            ElMessage.error(result.message)
     }
     )
 }

@@ -36,7 +36,7 @@ import type { Comments, Result, User } from '@/baseType';
 import { addComment, getComments, reportComments } from '@/request/comments';
 import { addCommentLike, deleteCommentLike, getCommentLike } from '@/request/commentslike';
 import router from '@/router';
-import { computed, onBeforeUpdate, onMounted, onUpdated, ref, watch } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps<{
     id: number

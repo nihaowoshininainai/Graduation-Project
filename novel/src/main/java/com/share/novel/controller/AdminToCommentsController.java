@@ -38,6 +38,9 @@ public class AdminToCommentsController {
     @Value("${comments.nid.uid}")
     String cnu;
 
+    @Value("${show.comments.nid}")
+    String scn;
+
     @Value("${show.weigui.user.uid}")
     String swuu;
 
@@ -59,6 +62,7 @@ public class AdminToCommentsController {
 
                 // 删除相关小说的评论缓存
                 stringRedisTemplate.delete(stringRedisTemplate.keys(cnu + comments.getNid() + ":*"));
+                stringRedisTemplate.delete(scn + comments.getNid());
 
                 if (comments.getState() == -1) {
                     String key = swuu + comments.getUid();

@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,7 +27,7 @@ public class UserToCommentsController {
 
     //用户举报评论
     @PostMapping("/reportComments")
-    public String reportComments(HttpServletRequest httpServletRequest,Comments comments){
+    public String reportComments(HttpServletRequest httpServletRequest,@RequestBody Comments comments){
         Function<Integer,String> function = uid -> {
             comments.setState(1);
             boolean flag = commentsService.updateById(comments);

@@ -13,7 +13,7 @@
 </template>
 <script setup lang="ts">
 import { type Admin, type Comments, type Result } from '@/baseType';
-import { getCommets, pass } from '@/request/comments';
+import { getCommets, nopass, pass } from '@/request/comments';
 import { ref } from 'vue';
 
 const comments = ref<Comments[]>()
@@ -61,7 +61,7 @@ const nopassButton = (index:number, comment:Comments) => {
   ).then(({ value }) =>{
     const admin:Admin = JSON.parse(localStorage.getItem('admin') as string) as Admin
     admin.pwd = value
-    pass(admin,comment).then(res=>{
+    nopass(admin,comment).then(res=>{
       const result = res.data
       if(result==='操作成功'){
         comments.value?.splice(index,1)
