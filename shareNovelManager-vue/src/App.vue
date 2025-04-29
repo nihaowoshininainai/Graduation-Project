@@ -4,6 +4,7 @@ import { User, ChatDotRound, Document, House } from '@element-plus/icons-vue'
 
 // 替换静态导入为动态组件加载
 const Home = defineAsyncComponent(() => import('./components/Home.vue'))
+const Admin = defineAsyncComponent(()=>import('./components/Admin.vue'))
 const UserM = defineAsyncComponent(() => import('./components/User.vue'))
 const Article = defineAsyncComponent(() => import('./components/Article.vue'))
 const Comment = defineAsyncComponent(() => import('./components/Comment.vue'))
@@ -12,6 +13,7 @@ const Login = defineAsyncComponent(() => import('./components/Login.vue'))
 
 const routes = {
     '/': Home,
+    '/admin': Admin,
     '/user': UserM,
     '/article': Article,
     '/comment': Comment,
@@ -51,20 +53,27 @@ if (localStorage.getItem('admin') === null)
                         </el-link>
                     </el-menu-item>
                     <el-menu-item index="2">
+                        <el-link :underline="false" href="#/admin">
+                            <el-icon>
+                                <User />
+                            </el-icon>管理员管理
+                        </el-link>
+                    </el-menu-item>
+                    <el-menu-item index="3">
                         <el-link :underline="false" href="#/user">
                             <el-icon>
                                 <User />
                             </el-icon>用户管理
                         </el-link>
                     </el-menu-item>
-                    <el-menu-item index="3">
+                    <el-menu-item index="4">
                         <el-link :underline="false" href="#/article">
                             <el-icon>
                                 <Document />
                             </el-icon>文章管理
                         </el-link>
                     </el-menu-item>
-                    <el-menu-item index="4">
+                    <el-menu-item index="5">
                         <el-link :underline="false" href="#/comment">
                             <el-icon>
                                 <ChatDotRound />

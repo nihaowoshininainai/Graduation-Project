@@ -17,11 +17,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.share.novel.base.Admin;
 import com.share.novel.base.Collection;
 import com.share.novel.base.Comments;
 import com.share.novel.base.Novel;
 import com.share.novel.base.NovelLabel;
 import com.share.novel.base.User;
+import com.share.novel.service.AdminService;
 import com.share.novel.service.CollectionService;
 import com.share.novel.service.CommentsService;
 import com.share.novel.service.DeepSeekService;
@@ -62,6 +64,9 @@ public class ShowController {
 
     @Autowired
     DeepSeekService deepseek;
+
+    @Autowired
+    AdminService adminService;
 
     @Value("${label.all}")
     String la;
@@ -336,8 +341,8 @@ public class ShowController {
     }
 
     // 获取违规超过三次的用户信息
-    @GetMapping("/getUsers")
-    String showUsers() {
+    @GetMapping("/getBanUsers")
+    String showBanUsers() {
         Set<String> keys = stringRedisTemplate.keys(swuu.concat("*"));
         Set<Integer> uids = new HashSet<>();
         if (keys.isEmpty())
@@ -352,8 +357,16 @@ public class ShowController {
         return Result.success("查询成功", userService.listByIds(uids));
     }
 
+    // 获取已经封禁的用户信息
+    @GetMapping("/getBannedUsers")
+    String showBannedUsers() {
+        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(User::getBanned, 1);
+        return Result.success("查询成功", userService.list(lambdaQueryWrapper));
+    }
+
     // 获取被举报评论
-    @GetMapping("getJvbaoComments")
+    @GetMapping("/getJvbaoComments")
     String getJvbaoComments() {
         LambdaQueryWrapper<Comments> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Comments::getState, 1);
@@ -361,4 +374,14 @@ public class ShowController {
         return Result.success("查询成功", commentsService.list(lambdaQueryWrapper));
     }
 
+    // 获取管理员信息
+    @GetMapping("/getAdmins")
+    String getAdmins(@RequestParam String aname) {
+        LambdaQueryWrapper<Admin> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.ne(Admin::getAname, "admin");
+        if (!aname.equals("admin"))
+            return Result.error("非最高管理员，无法查看其他管理员信息", "");
+        else
+            return Result.success("查询成功", adminService.list(lambdaQueryWrapper));
+    }
 }

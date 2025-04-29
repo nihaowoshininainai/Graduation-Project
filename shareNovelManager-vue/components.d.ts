@@ -8,14 +8,17 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Admin: typeof import('./src/components/Admin.vue')['default']
     Article: typeof import('./src/components/Article.vue')['default']
     ArticleOne: typeof import('./src/components/ArticleOne.vue')['default']
     ArticleTwo: typeof import('./src/components/ArticleTwo.vue')['default']
+    BannedUser: typeof import('./src/components/UserOne.vue')['default']
     Comment: typeof import('./src/components/Comment.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCol: typeof import('element-plus/es')['ElCol']
     ElContainer: typeof import('element-plus/es')['ElContainer']
+    ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElHeader: typeof import('element-plus/es')['ElHeader']
@@ -35,5 +38,7 @@ declare module 'vue' {
     Login: typeof import('./src/components/Login.vue')['default']
     NotFound: typeof import('./src/components/NotFound.vue')['default']
     User: typeof import('./src/components/User.vue')['default']
+    UserOne: typeof import('./src/components/UserOne.vue')['default']
+    UserTwo: typeof import('./src/components/UserTwo.vue')['default']
   }
 }

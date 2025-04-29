@@ -41,6 +41,9 @@ public class AdminToUserController {
     @Value("${user.id}")
     String ui;
 
+    @Value("${show.weigui.user.uid}")
+    String swuu;
+
     // 审核用户统一接口
     @PostMapping("/auditUser")
     public String audit(@RequestBody AdminToUser adminToUser) {
@@ -60,6 +63,7 @@ public class AdminToUserController {
                 // 删除相关用户缓存
                 stringRedisTemplate.delete(stringRedisTemplate.keys(tu + user.getUid() + "*"));
                 stringRedisTemplate.delete(stringRedisTemplate.keys(ui + user.getUid()));
+                stringRedisTemplate.delete(stringRedisTemplate.keys(swuu + user.getUid()));
 
                 return "操作成功";
             } else

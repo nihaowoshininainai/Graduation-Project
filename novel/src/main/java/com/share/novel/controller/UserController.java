@@ -11,6 +11,7 @@ import com.share.novel.utils.Result;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Data;
 
 import java.util.List;
 import java.util.function.Function;
@@ -25,6 +26,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController()
 @RequestMapping("/api")
 public class UserController {
+
+    @Data
+    static class RestePwd {
+        String oldPwd;
+        String newPwd;
+        
+    }
 
     @Autowired
     UserService userService;
@@ -55,7 +63,9 @@ public class UserController {
     
     //修改密码
     @PostMapping("/resetPwd")
-    public String resetPwd(HttpServletRequest httpServletRequest,String newPwd,String oldPwd) {
+    public String resetPwd(HttpServletRequest httpServletRequest,@RequestBody RestePwd rsp) {
+        String newPwd = rsp.getNewPwd();
+        String oldPwd = rsp.getOldPwd();
         Function<Integer,String> function = uid -> {
             String result = userService.resetPwd(uid, newPwd, oldPwd);
             JSONObject map = JSONUtil.parseObj(result);

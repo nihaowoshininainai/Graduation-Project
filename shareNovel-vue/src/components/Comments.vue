@@ -67,7 +67,7 @@ const getCom = () => {
     getComments(props.id).then(res => {
         const result: Result = res.data
         if (result.state === '1') {
-            comments.value.push(...result.data)
+            comments.value = result.data
             comments.value.forEach((comment) => {
                 if (userExist)
                     getLike(comment.id as number, user.uid as number)

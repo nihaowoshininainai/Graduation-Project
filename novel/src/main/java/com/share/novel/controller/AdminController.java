@@ -39,7 +39,7 @@ public class AdminController {
     }
     
     //删除管理员
-    @PostMapping("/delAdmiln")
+    @PostMapping("/delAdmin")
     public String delAdmin(@RequestBody List<Admin> admins){
 
         //firstAdmin为发出请求的管理员，secondAdmin为被删除的管理员
