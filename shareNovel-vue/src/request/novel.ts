@@ -119,3 +119,12 @@ export const getNovelRecommend = (uid: number) => {
         }
     })
 }
+
+//删除小说
+export const delNovel = (novel:Novel,user:User) => {
+    const userToNovel:UserToNovel = {
+        user,
+        novel
+    }
+    return request.post("delNovel", userToNovel)
+}

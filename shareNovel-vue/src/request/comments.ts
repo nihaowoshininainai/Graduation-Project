@@ -19,3 +19,17 @@ export const addComment = (comments:Comments) => {
 export const reportComments = (comments:Comments)=>{
     return request.post('reportComments',comments)
 }
+
+//获取用户评论
+export const getUserComments = (id:number)=>{
+    return request.get('showUserComments',{
+        params:{
+            uid:id
+        }
+    })
+}
+
+//删除评论
+export const delComments = (comments:Comments)=>{
+    return request.post('delCom',comments)
+}

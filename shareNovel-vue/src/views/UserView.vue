@@ -23,6 +23,9 @@ if (user.uid === Number(props.id)) {
         <el-tab-pane label="我的收藏">
             <ShowCollectNovels :uid="Number(id)"></ShowCollectNovels>
         </el-tab-pane>
+        <el-tab-pane label="我的评论">
+            <UserComments></UserComments>
+        </el-tab-pane>
         <el-tab-pane label="上传作品">
             <UploadNovel></UploadNovel>
         </el-tab-pane>

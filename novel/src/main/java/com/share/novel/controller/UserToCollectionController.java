@@ -1,5 +1,7 @@
 package com.share.novel.controller;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -51,6 +53,7 @@ public class UserToCollectionController {
             Collection collection = new Collection();
             collection.setUid(uid);
             collection.setNid(novel.getId());
+            collection.setCreateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             boolean flag = collectionService.save(collection);
             if(flag){
                 

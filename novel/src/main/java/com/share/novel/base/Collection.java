@@ -10,12 +10,14 @@ import lombok.Data;
 @TableName("Collection")
 /*
  * @param uid 用户id
+ * 
  * @param nid 小说id
  */
 public class Collection {
 
     @TableId(type = IdType.AUTO)
-    Integer id;
-    Integer uid;
-    Integer nid;
+    private Integer id;
+    private Integer uid;
+    private Integer nid;
+    private String createTime;
 }

@@ -23,6 +23,7 @@ import com.share.novel.base.Comments;
 import com.share.novel.base.Novel;
 import com.share.novel.base.NovelLabel;
 import com.share.novel.base.User;
+import com.share.novel.mapper.AdminToNovelMapper;
 import com.share.novel.service.AdminService;
 import com.share.novel.service.CollectionService;
 import com.share.novel.service.CommentsService;
@@ -67,6 +68,9 @@ public class ShowController {
 
     @Autowired
     AdminService adminService;
+
+    @Autowired
+    AdminToNovelMapper adminToNovelMapper;
 
     @Value("${label.all}")
     String la;
@@ -321,6 +325,16 @@ public class ShowController {
         return result;
     }
 
+    // 获取用户评论
+    @GetMapping("/showUserComments")
+    String showUserComments(@RequestParam("uid") Integer uid) {
+
+        LambdaQueryWrapper<Comments> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Comments::getUid, uid);
+
+        return Result.success("查询成功", commentsService.list(wrapper));
+    }
+
     /*
      * 以下为管理端数据展示
      */
@@ -383,5 +397,23 @@ public class ShowController {
             return Result.error("非最高管理员，无法查看其他管理员信息", "");
         else
             return Result.success("查询成功", adminService.list(lambdaQueryWrapper));
+    }
+
+    // 获取所有用户信息
+    @GetMapping("/getAllUsers")
+    String getAllUsers() {
+        return Result.success("查询成功", userService.list());
+    }
+
+    // 获取所有小说信息
+    @GetMapping("/getAllNovels")
+    String getAllNovels() {
+        return Result.success("查询成功", novelService.list());
+    }
+
+    //获取审核小说记录
+    @GetMapping("/getShenheRecord")
+    String getShenheRecord() {
+        return Result.success("查询成功", adminToNovelMapper.selectList(null));
     }
 }

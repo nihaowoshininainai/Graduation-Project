@@ -46,6 +46,9 @@ public class UserToNovelController {
     @Value("${novel.uid}")
     String nu;
 
+    @Value("${show.novels.uid}")
+    String snu;
+
     //用户添加文章
     @PostMapping("/addNovel")
     public String addNovel(HttpServletRequest httpServletRequest,@RequestBody UserToNovel userToNovel){
@@ -107,7 +110,8 @@ public class UserToNovelController {
                 result = novelService.del(novel);
 
                 //删除用户查询小说的缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys(nu+uid+"*"));
+                stringRedisTemplate.delete(nu+uid);
+                stringRedisTemplate.delete(snu+uid);
 
             }
             else

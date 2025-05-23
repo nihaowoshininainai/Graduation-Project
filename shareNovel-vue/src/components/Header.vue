@@ -1,7 +1,7 @@
 <!-- 这是导航栏 -->
 <template>
     <el-row>
-        <el-col :span="6">网站名</el-col>
+        <el-col :span="6">小说分享网站</el-col>
         <el-col :span="6" style="display: flex;justify-content: space-around;">
             <RouterLink to="/">
                 <el-link>首页</el-link>

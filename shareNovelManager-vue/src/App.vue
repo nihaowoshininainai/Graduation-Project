@@ -7,17 +7,19 @@ const Home = defineAsyncComponent(() => import('./components/Home.vue'))
 const Admin = defineAsyncComponent(()=>import('./components/Admin.vue'))
 const UserM = defineAsyncComponent(() => import('./components/User.vue'))
 const Article = defineAsyncComponent(() => import('./components/Article.vue'))
-const Comment = defineAsyncComponent(() => import('./components/Comment.vue'))
 const NotFound = defineAsyncComponent(() => import('./components/NotFound.vue'))
 const Login = defineAsyncComponent(() => import('./components/Login.vue'))
+const Shenhe = defineAsyncComponent(()=>import('./components/Shenhe.vue'))
+const Record = defineAsyncComponent(()=>import('./components/Record.vue'))
 
 const routes = {
     '/': Home,
     '/admin': Admin,
     '/user': UserM,
     '/article': Article,
-    '/comment': Comment,
-    '/login': Login
+    '/login': Login,
+    '/shenhe': Shenhe,
+    '/record': Record
 }
 
 const currentPath = ref(window.location.hash)
@@ -74,10 +76,17 @@ if (localStorage.getItem('admin') === null)
                         </el-link>
                     </el-menu-item>
                     <el-menu-item index="5">
-                        <el-link :underline="false" href="#/comment">
+                        <el-link :underline="false" href="#/shenhe">
                             <el-icon>
                                 <ChatDotRound />
-                            </el-icon>评论管理
+                            </el-icon>网站内容合规管理
+                        </el-link>
+                    </el-menu-item>
+                    <el-menu-item index="6">
+                        <el-link :underline="false" href="#/record">
+                            <el-icon>
+                                <ChatDotRound />
+                            </el-icon>审核记录
                         </el-link>
                     </el-menu-item>
                 </el-menu>

@@ -1,1 +1,0 @@
-import{d as o,ad as a,c4 as s,o as _}from"./index-IY145ecu.js";const m=o({__name:"SearchView",props:{name:{}},setup(c){return(e,p)=>{const n=s;return _(),a(n,{name:e.name},null,8,["name"])}}});export{m as default};

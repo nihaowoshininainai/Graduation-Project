@@ -10,6 +10,7 @@ import lombok.Data;
 @TableName("CommentsLike")
 /*
  * @params cid 评论id
+ * 
  * @params uid 用户id
  */
 public class CommentsLike {
@@ -18,4 +19,5 @@ public class CommentsLike {
     private Integer id;
     private Integer cid;
     private Integer uid;
+    private String createTime;
 }

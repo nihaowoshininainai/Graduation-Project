@@ -29,3 +29,8 @@ export const delAdmin = (adminTop: Admin, admin: Admin) => {
         [adminTop, admin]
     )
 }
+
+//获取审核文章记录
+export const getArticleRecord = () => {
+    return request.get('getShenheRecord')
+}

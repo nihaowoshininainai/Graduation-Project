@@ -58,3 +58,11 @@ export type Admin = {
     aname:string,
     pwd?:string
 }
+
+export type AdminToNovel = {
+    id?:number,
+    aid?:number,
+    nid?:number,
+    createTime?:string,
+    record?:string
+}

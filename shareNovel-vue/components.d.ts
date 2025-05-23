@@ -31,13 +31,16 @@ declare module 'vue' {
     ElTag: typeof import('element-plus/es')['ElTag']
     ElText: typeof import('element-plus/es')['ElText']
     Header: typeof import('./src/components/Header.vue')['default']
+    ModifyNovel: typeof import('./src/components/ModifyNovel.vue')['default']
     Novel: typeof import('./src/components/Novel.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     ShowCollectNovels: typeof import('./src/components/ShowCollectNovels.vue')['default']
+    ShowComments: typeof import('./src/components/ShowComments.vue')['default']
     ShowNovels: typeof import('./src/components/ShowNovels.vue')['default']
     ShowUserNovels: typeof import('./src/components/ShowUserNovels.vue')['default']
     UploadNovel: typeof import('./src/components/UploadNovel.vue')['default']
+    UserComments: typeof import('./src/components/UserComments.vue')['default']
     UserInfo: typeof import('./src/components/UserInfo.vue')['default']
   }
 }

@@ -1,0 +1,1 @@
+import{r as e}from"./el-message-C8LzWNfF.js";const a=e.get("getBanUsers"),r=e.get("getBannedUsers"),o=(n,s)=>(s.banned=1,e.post("auditUser",{admin:n,user:s})),U=(n,s)=>(s.banned=0,e.post("auditUser",{admin:n,user:s}));export{r as a,o as b,a as g,U as u};

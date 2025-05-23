@@ -24,3 +24,22 @@ export const unbanUser = (admin:Admin,user:User)=>{
         user
     })
 }
+
+//获取所有用户信息
+export const getAllUsers = request.get('getAllUsers')
+
+//删除用户
+export const deleteUser = (admin:Admin,user:User)=>{
+    return request.post('deleteUserByAdmin',{
+        admin,
+        user
+    })
+}
+
+//修改用户密码
+export const changeUserPassword = (admin:Admin,user:User)=>{
+    return request.post('resetPwdByAdmin',{
+        admin,
+        user
+    })
+}

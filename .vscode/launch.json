@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-NovelApplication<novel>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.share.novel.NovelApplication",
+            "projectName": "novel",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
