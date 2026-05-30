@@ -17,6 +17,7 @@ import com.share.novel.base.Collection;
 import com.share.novel.base.Novel;
 import com.share.novel.service.CollectionService;
 import com.share.novel.utils.ControllerUtil;
+import com.share.novel.utils.RedisUtil;
 import com.share.novel.utils.Result;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +31,9 @@ public class UserToCollectionController {
 
     @Autowired
     StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    RedisUtil redisUtil;
 
     @Autowired
     ControllerUtil controllerUtil;
@@ -46,57 +50,47 @@ public class UserToCollectionController {
     @Value("${show.novels.like.uid}")
     String snlu;
 
-    //添加收藏
     @PostMapping("/addCol")
-    public String addCol(HttpServletRequest httpServletRequest,@RequestBody Novel novel){
-        Function<Integer,String> function = uid -> {
+    public Result<?> addCol(HttpServletRequest httpServletRequest,@RequestBody Novel novel){
+        Function<Integer,Result<?>> function = uid -> {
             Collection collection = new Collection();
             collection.setUid(uid);
             collection.setNid(novel.getId());
             collection.setCreateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             boolean flag = collectionService.save(collection);
             if(flag){
-                
-                //删除查找该用户的收藏缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys(cun+uid+"*"));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(cu+uid+"*"));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(snl+uid+"*"));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(snlu+uid+"*"));
-
+                redisUtil.deleteByPattern(cun+uid+"*");
+                redisUtil.deleteByPattern(cu+uid+"*");
+                redisUtil.deleteByPattern(snl+uid+"*");
+                redisUtil.deleteByPattern(snlu+uid+"*");
                 return Result.success("成功收藏", "");
             }
             else
                 return Result.error("收藏失败", "");
         };
-        Integer uid = null;
 
-        return controllerUtil.sameFunc(httpServletRequest, uid, function);
+        return controllerUtil.sameFunc(httpServletRequest, function);
     }
 
-    //删除收藏
     @PostMapping("/delCol")
-    public String delCol(HttpServletRequest httpServletRequest,@RequestBody Novel novel){
-        Function<Integer,String> function = uid -> {
+    public Result<?> delCol(HttpServletRequest httpServletRequest,@RequestBody Novel novel){
+        Function<Integer,Result<?>> function = uid -> {
             Collection collection = new Collection();
             collection.setUid(uid);
             collection.setNid(novel.getId());
             Map<String,Object> map = Map.of("uid",uid,"nid",novel.getId());
             boolean flag = collectionService.removeByMap(map);
             if(flag){
-                
-                //删除查找该用户的收藏缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys(cun+uid+"*"));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(cu+uid+"*"));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(snl+uid+"*"));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(snlu+uid+"*"));
-
+                redisUtil.deleteByPattern(cun+uid+"*");
+                redisUtil.deleteByPattern(cu+uid+"*");
+                redisUtil.deleteByPattern(snl+uid+"*");
+                redisUtil.deleteByPattern(snlu+uid+"*");
                 return Result.success("取消收藏", "");
             }
             else
                 return Result.error("取消失败", "");
         };
-        Integer uid = null;
 
-        return controllerUtil.sameFunc(httpServletRequest, uid, function);
+        return controllerUtil.sameFunc(httpServletRequest, function);
     }
 }

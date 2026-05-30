@@ -8,17 +8,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.share.novel.base.Admin;
 import com.share.novel.base.Comments;
 import com.share.novel.service.AdminService;
 import com.share.novel.service.CommentsService;
+import com.share.novel.utils.RedisUtil;
+import com.share.novel.utils.Result;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 
 @Data
 class AdminToComments {
-    private Admin admin;
     private Comments comments;
 }
 
@@ -35,6 +35,9 @@ public class AdminToCommentsController {
     @Autowired
     StringRedisTemplate stringRedisTemplate;
 
+    @Autowired
+    RedisUtil redisUtil;
+
     @Value("${comments.nid.uid}")
     String cnu;
 
@@ -44,38 +47,30 @@ public class AdminToCommentsController {
     @Value("${show.weigui.user.uid}")
     String swuu;
 
-    // 审核评论统一接口
     @PostMapping("/auditComments")
-    public String audit(@RequestBody AdminToComments adminToComments) {
-        Admin admin = adminToComments.getAdmin();
+    public Result<?> audit(@RequestBody AdminToComments adminToComments, HttpServletRequest request) {
+        Result<?> authResult = adminService.testAdminLogin(request);
+        if (!authResult.isSuccess()) {
+            return Result.error("管理员身份验证失败", null);
+        }
         Comments comments = adminToComments.getComments();
 
-        // 判断审核身份
-        LambdaQueryWrapper<Admin> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Admin::getAname, admin.getAname());
-        lambdaQueryWrapper.eq(Admin::getPwd, admin.getPwd());
-        boolean flag = adminService.exists(lambdaQueryWrapper);
+        boolean cflag = commentsService.updateById(comments);
+        if (cflag) {
 
-        if (flag) {
-            boolean cflag = commentsService.updateById(comments);
-            if (cflag) {
+            redisUtil.deleteByPattern(cnu + comments.getNid() + ":*");
+            stringRedisTemplate.delete(scn + comments.getNid());
 
-                // 删除相关小说的评论缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys(cnu + comments.getNid() + ":*"));
-                stringRedisTemplate.delete(scn + comments.getNid());
+            if (comments.getState() == -1) {
+                String key = swuu + comments.getUid();
+                if (stringRedisTemplate.opsForValue().get(key) != null) {
+                    stringRedisTemplate.opsForValue().increment(key, 1);
+                } else
+                    stringRedisTemplate.opsForValue().set(key, "1");
+            }
 
-                if (comments.getState() == -1) {
-                    String key = swuu + comments.getUid();
-                    if (stringRedisTemplate.opsForValue().get(key) != null) {
-                        stringRedisTemplate.opsForValue().increment(key, 1);
-                    } else
-                        stringRedisTemplate.opsForValue().set(key, "1");
-                }
-
-                return "操作成功";
-            } else
-                return "操作失败，请重试";
+            return Result.success("操作成功", null);
         } else
-            return "管理员密码错误";
+            return Result.error("操作失败，请重试", null);
     }
 }

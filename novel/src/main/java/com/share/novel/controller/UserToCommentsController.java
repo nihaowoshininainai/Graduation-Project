@@ -25,19 +25,17 @@ public class UserToCommentsController {
     @Autowired
     ControllerUtil controllerUtil;
 
-    //用户举报评论
     @PostMapping("/reportComments")
-    public String reportComments(HttpServletRequest httpServletRequest,@RequestBody Comments comments){
-        Function<Integer,String> function = uid -> {
+    public Result<?> reportComments(HttpServletRequest httpServletRequest,@RequestBody Comments comments){
+        Function<Integer,Result<?>> function = uid -> {
             comments.setState(1);
             boolean flag = commentsService.updateById(comments);
             if(flag)
                 return Result.success("举报成功", "");
-            
+
             return Result.error("举报失败，请重试", "");
         };
-        Integer uid = null;
 
-        return controllerUtil.sameFunc(httpServletRequest, uid, function);
+        return controllerUtil.sameFunc(httpServletRequest, function);
     }
 }

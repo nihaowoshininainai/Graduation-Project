@@ -19,6 +19,7 @@ import com.share.novel.service.UserService;
 import com.share.novel.utils.RandomUtil;
 import com.share.novel.utils.Result;
 
+import cn.hutool.crypto.digest.BCrypt;
 import cn.hutool.jwt.JWTUtil;
 
 @Service
@@ -43,32 +44,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
     public String getToken(User user){
         Map<String,Object> payload = new HashMap<>();
 
-        //设置token不存敏感信息
         user.setPwd(" ");
 
         payload.put("user", user);
 
-        //添加此负载为了使相同用户多次登陆有不同jwt，提高安全性
         payload.put("change", System.currentTimeMillis());
 
         String token = JWTUtil.createToken(payload, key.getBytes());
 
-        //生成的token存入redis
         stringRedisTemplate.opsForValue().set("token:"+user.getUid()+":"+token, "true", 1, TimeUnit.DAYS);
 
         return token;
     }
 
     @Override
-    public String register(String uname,String pwd){
-        //判断是否有重名
+    public Result<?> register(String uname,String pwd){
         QueryWrapper<User> isSame = new QueryWrapper<>();
         isSame.eq("uname", uname);
         boolean flag = userMapper.exists(isSame);
 
-        //无重名，将用户名与密码存入数据库，将用户信息转成token进行返回
         if(!flag){
-            User user = new User(uname, pwd);
+            User user = new User(uname, BCrypt.hashpw(pwd, BCrypt.gensalt()));
             int isSuccess = userMapper.insert(user);
             if(isSuccess>0){
                 User sUser = userMapper.selectOne(isSame);
@@ -83,14 +79,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
     }
 
     @Override
-    public String login(String uname,String pwd){
+    public Result<?> login(String uname,String pwd){
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("uname", uname);
-        queryWrapper.eq("pwd", pwd);
-        boolean flag = userMapper.exists(queryWrapper);
+        User user = userMapper.selectOne(queryWrapper);
 
-        if(flag){
-            User user = userMapper.selectOne(queryWrapper);
+        if(user != null && BCrypt.checkpw(pwd, user.getPwd())){
             String token = getToken(user);
 
             return Result.success("登陆成功", token);
@@ -100,21 +94,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
     }
 
     @Override
-    public String resetPwd(Integer uid,String newPwd,String oldPwd){
-        
-        //验证旧密码正确性
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("uid", uid);
-        queryWrapper.eq("pwd", oldPwd);
-        boolean flag = userMapper.exists(queryWrapper);
+    public Result<?> resetPwd(Integer uid,String newPwd,String oldPwd){
 
-        if(flag){
+        User user = userMapper.selectById(uid);
+        if(user != null && BCrypt.checkpw(oldPwd, user.getPwd())){
 
-            //将新密码存入mysql
-            User user = new User();
-            user.setUid(uid);
-            user.setPwd(newPwd);
-            int isSuccess = userMapper.updateById(user);
+            User updateUser = new User();
+            updateUser.setUid(uid);
+            updateUser.setPwd(BCrypt.hashpw(newPwd, BCrypt.gensalt()));
+            int isSuccess = userMapper.updateById(updateUser);
 
             if(isSuccess>0){
                 User nUser = userMapper.selectById(uid);
@@ -127,62 +115,58 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements Use
         }
         else
             return Result.error("密码错误", "");
-        
+
     }
 
     @Override
-    public String deleteUser(Integer uid,String pwd){
+    public Result<?> deleteUser(Integer uid,String pwd){
 
-        //验证密码正确性
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("uid", uid);
-        queryWrapper.eq("pwd", pwd);
-        boolean flag = userMapper.exists(queryWrapper);
+        User user = userMapper.selectById(uid);
+        if(user != null && BCrypt.checkpw(pwd, user.getPwd())){
 
-        if(flag){
-
-            //将该用户从mysql中删除
+            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("uid", uid);
             int d = userMapper.delete(queryWrapper);
 
             if(d>0)
                 return Result.success("成功注销", "");
-            else 
+            else
                 return Result.error("注销失败，请重试", "");
         }
-        else 
+        else
             return Result.error("密码错误", "");
     }
 
     @Override
-    public String getUname(Integer id){
-        //先在redis中查询
-        String key = su+id;
-        String result = stringRedisTemplate.opsForValue().get(key);
+    public Result<?> getUname(Integer id){
+        String redisKey = su+id;
+        String cachedJson = stringRedisTemplate.opsForValue().get(redisKey);
 
-        if(result==null){
-            User user = userMapper.selectById(id);
-            result = Result.success("查找成功", user.getUname());
-            stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        if(cachedJson != null){
+            return Result.fromJson(cachedJson);
         }
 
+        User user = userMapper.selectById(id);
+        Result<?> result = Result.success("查找成功", user.getUname());
+        stringRedisTemplate.opsForValue().set(redisKey, result.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
         return result;
     }
 
     @Override
-    public String getUid(String uname){
-        //先在redis中查询
-        String key = suu+uname;
-        String result = stringRedisTemplate.opsForValue().get(key);
+    public Result<?> getUid(String uname){
+        String redisKey = suu+uname;
+        String cachedJson = stringRedisTemplate.opsForValue().get(redisKey);
 
-        if(result==null){
-            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(User::getUname, uname);
-            User user = userMapper.selectOne(queryWrapper);
-            result = Result.success("查找成功", user.getUid());
-            stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        if(cachedJson != null){
+            return Result.fromJson(cachedJson);
         }
 
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUname, uname);
+        User user = userMapper.selectOne(queryWrapper);
+        Result<?> result = Result.success("查找成功", user.getUid());
+        stringRedisTemplate.opsForValue().set(redisKey, result.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
         return result;
     }
-    
+
 }

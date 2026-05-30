@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,22 +47,18 @@ public class HotDataController {
     }
 
     //浏览量加一
-    @GetMapping("/addViews")
+    @PostMapping("/addViews")
     public Integer addViews(@RequestParam("nid") Integer nid) {
-        //查询redis中是否有该小说的浏览量
         String key = snvn + nid;
         String result = stringRedisTemplate.opsForValue().get(key);
 
         if(result == null) {
-            synchronized(HotDataController.class){
-                String res = stringRedisTemplate.opsForValue().get(key);
-                if(res == null) {
-                    Novel novel = novelService.getById(nid);
-                    Integer views = novel.getViews();
-                    result = views.toString();
-                    stringRedisTemplate.opsForValue().set(key, result);
-                }
+            Novel novel = novelService.getById(nid);
+            if(novel == null){
+                return 0;
             }
+            Integer views = novel.getViews();
+            stringRedisTemplate.opsForValue().set(key, views.toString());
         }
 
         stringRedisTemplate.opsForValue().increment(key, 1);

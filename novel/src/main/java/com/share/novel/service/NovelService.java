@@ -2,27 +2,20 @@ package com.share.novel.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.share.novel.base.Novel;
+import com.share.novel.utils.Result;
 
 public interface NovelService extends IService<Novel> {
 
-    //添加小说
-    String add(Novel novel);
+    Result<?> add(Novel novel);
 
-    //删除小说;
-    String del(Novel novel);
+    Result<?> del(Novel novel);
 
-    //分页推送,
-    String index(String condition,String sort,Integer current,Integer size);
+    Result<?> index(String condition,String sort,Integer current,Integer size);
 
-    //分类推送
-    String classify(String condition,String sort,Integer current,Integer size,Integer labelId);
+    Result<?> classify(String condition,String sort,Integer current,Integer size,Integer labelId);
 
-    //搜索
-    String search(String condition,String sort,Integer current,Integer size,String keyword);
-    /*
-     * @param time 按照时间排序
-     * @param hot 按照热度排序
-     */
+    Result<?> search(String condition,String sort,Integer current,Integer size,String keyword);
+
     public enum Condition{
         time,
         hot
@@ -32,5 +25,5 @@ public interface NovelService extends IService<Novel> {
         asc,
         desc
     }
-    
+
 }

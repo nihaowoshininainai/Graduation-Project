@@ -17,7 +17,7 @@ public class LabelServiceImpl extends ServiceImpl<LabelMapper,Label> implements 
     LabelMapper labelMapper;
 
     @Override
-    public String addLabel(String name) {
+    public Result<?> addLabel(String name) {
         QueryWrapper<Label> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("name", name);
         boolean flag = labelMapper.exists(queryWrapper);
@@ -32,7 +32,7 @@ public class LabelServiceImpl extends ServiceImpl<LabelMapper,Label> implements 
     }
 
     @Override
-    public String delLabel(Integer id) {
+    public Result<?> delLabel(Integer id) {
         int d = labelMapper.deleteById(id);
         if(d>0)
             return Result.success("成功删除", "");

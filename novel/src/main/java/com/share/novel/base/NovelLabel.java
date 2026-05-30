@@ -19,6 +19,8 @@ public class NovelLabel {
     private Integer nid;
     private Integer lid;
 
+    public NovelLabel(){}
+
     public NovelLabel(Integer nid,Integer lid){
         this.nid = nid;
         this.lid = lid;

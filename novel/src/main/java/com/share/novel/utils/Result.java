@@ -1,59 +1,51 @@
 package com.share.novel.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 
-//固定用来传输给前端的格式
-public class Result {
+public class Result<T> {
 
-    //请求成功
-    /*
-     * @param message 说明文字
-     * @param data 需要JSON格式化的数据
-     * @returns result 请求数据的结果
-     */
-    public static String success(String message,Object data) {
-        Map<String, Object> result = new TreeMap<>();
-        result.put("state", "1");
-        result.put("message", message);
-        result.put("data", data);
-        return JSONUtil.toJsonStr(result);
+    private String state;
+    private String message;
+    private T data;
+
+    public static <T> Result<T> success(String message, T data) {
+        Result<T> result = new Result<>();
+        result.state = "1";
+        result.message = message;
+        result.data = data;
+        return result;
     }
 
-    //请求失败
-    /*
-     * @param message 说明文字
-     * @param data 需要JSON格式化的数据
-     * @returns result 请求数据的结果
-     */
-    public static String error(String message,Object data){
-        Map<String, Object> result = new TreeMap<>();
-        result.put("state", "0");
-        result.put("message", message);
-        if(data==null)
-            result.put("data", "null");
-        else
-            result.put("data", data);
-        return JSONUtil.toJsonStr(result);        
+    public static <T> Result<T> error(String message, T data) {
+        Result<T> result = new Result<>();
+        result.state = "0";
+        result.message = message;
+        result.data = data;
+        return result;
     }
 
-    /*
-     * 将json字符串中属性提取出来，存入list传出
-     */
-    public static List<String> jsonStrtoList(String jsonStr){
-        JSONObject jsonObject = JSONUtil.parseObj(jsonStr);
-        String state = jsonObject.getStr("state");
-        String message = jsonObject.getStr("message");
-        String data = jsonObject.getStr("data");
-        List<String> list = new ArrayList<>();
-        list.add(state);
-        list.add(message);
-        list.add(data);
-        return list;
+    public boolean isSuccess() {
+        return "1".equals(state);
     }
+
+    public String toJson() {
+        return JSONUtil.toJsonStr(this);
+    }
+
+    public static Result<Object> fromJson(String json) {
+        JSONObject obj = JSONUtil.parseObj(json);
+        Result<Object> result = new Result<>();
+        result.state = obj.getStr("state");
+        result.message = obj.getStr("message");
+        result.data = obj.get("data");
+        return result;
+    }
+
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
+    public T getData() { return data; }
+    public void setData(T data) { this.data = data; }
 }

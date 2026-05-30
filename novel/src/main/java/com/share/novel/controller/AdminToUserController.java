@@ -2,23 +2,22 @@ package com.share.novel.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.share.novel.base.Admin;
 import com.share.novel.base.User;
 import com.share.novel.service.AdminService;
 import com.share.novel.service.UserService;
+import com.share.novel.utils.RedisUtil;
+import com.share.novel.utils.Result;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 
 @Data
 class AdminToUser {
-    private Admin admin;
     private User user;
 }
 
@@ -33,7 +32,7 @@ public class AdminToUserController {
     UserService userService;
 
     @Autowired
-    StringRedisTemplate stringRedisTemplate;
+    RedisUtil redisUtil;
 
     @Value("${token.uid}")
     String tu;
@@ -44,85 +43,61 @@ public class AdminToUserController {
     @Value("${show.weigui.user.uid}")
     String swuu;
 
-    // 审核用户统一接口
     @PostMapping("/auditUser")
-    public String audit(@RequestBody AdminToUser adminToUser) {
-        Admin admin = adminToUser.getAdmin();
+    public Result<?> audit(@RequestBody AdminToUser adminToUser, HttpServletRequest request) {
+        Result<?> authResult = adminService.testAdminLogin(request);
+        if (!authResult.isSuccess()) {
+            return Result.error("管理员身份验证失败", null);
+        }
         User user = adminToUser.getUser();
 
-        // 判断管理员身份
-        LambdaQueryWrapper<Admin> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Admin::getAname, admin.getAname());
-        lambdaQueryWrapper.eq(Admin::getPwd, admin.getPwd());
-        boolean flag = adminService.exists(lambdaQueryWrapper);
+        boolean uflag = userService.updateById(user);
+        if (uflag) {
 
-        if (flag) {
-            boolean uflag = userService.updateById(user);
-            if (uflag) {
+            redisUtil.deleteByPattern(tu + user.getUid() + "*");
+            redisUtil.deleteByPattern(ui + user.getUid());
+            redisUtil.deleteByPattern(swuu + user.getUid());
 
-                // 删除相关用户缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys(tu + user.getUid() + "*"));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(ui + user.getUid()));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(swuu + user.getUid()));
-
-                return "操作成功";
-            } else
-                return "操作失败，请重试";
+            return Result.success("操作成功", null);
         } else
-            return "管理员密码错误";
+            return Result.error("操作失败，请重试", null);
     }
 
-    // 删除用户
     @PostMapping("/deleteUserByAdmin")
-    public String deleteUser(@RequestBody AdminToUser adminToUser) {
-        Admin admin = adminToUser.getAdmin();
+    public Result<?> deleteUser(@RequestBody AdminToUser adminToUser, HttpServletRequest request) {
+        Result<?> authResult = adminService.testAdminLogin(request);
+        if (!authResult.isSuccess()) {
+            return Result.error("管理员身份验证失败", null);
+        }
         User user = adminToUser.getUser();
 
-        // 判断管理员身份
-        LambdaQueryWrapper<Admin> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Admin::getAname, admin.getAname());
-        lambdaQueryWrapper.eq(Admin::getPwd, admin.getPwd());
-        boolean flag = adminService.exists(lambdaQueryWrapper);
+        boolean uflag = userService.removeById(user.getUid());
+        if (uflag) {
 
-        if (flag) {
-            boolean uflag = userService.removeById(user.getUid());
-            if (uflag) {
-
-                // 删除相关用户缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys(tu + user.getUid() + "*"));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(ui + user.getUid()));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(swuu + user.getUid()));
-                return "操作成功";
-            } else
-                return "操作失败，请重试";
+            redisUtil.deleteByPattern(tu + user.getUid() + "*");
+            redisUtil.deleteByPattern(ui + user.getUid());
+            redisUtil.deleteByPattern(swuu + user.getUid());
+            return Result.success("操作成功", null);
         } else
-            return "管理员密码错误";
+            return Result.error("操作失败，请重试", null);
     }
 
-    // 修改用户密码
     @PostMapping("/resetPwdByAdmin")
-    public String resetPwd(@RequestBody AdminToUser adminToUser) {
-        Admin admin = adminToUser.getAdmin();
+    public Result<?> resetPwd(@RequestBody AdminToUser adminToUser, HttpServletRequest request) {
+        Result<?> authResult = adminService.testAdminLogin(request);
+        if (!authResult.isSuccess()) {
+            return Result.error("管理员身份验证失败", null);
+        }
         User user = adminToUser.getUser();
 
-        // 判断管理员身份
-        LambdaQueryWrapper<Admin> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Admin::getAname, admin.getAname());
-        lambdaQueryWrapper.eq(Admin::getPwd, admin.getPwd());
-        boolean flag = adminService.exists(lambdaQueryWrapper);
+        boolean uflag = userService.updateById(user);
+        if (uflag) {
 
-        if (flag) {
-            boolean uflag = userService.updateById(user);
-            if (uflag) {
-
-                // 删除相关用户缓存
-                stringRedisTemplate.delete(stringRedisTemplate.keys(tu + user.getUid() + "*"));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(ui + user.getUid()));
-                stringRedisTemplate.delete(stringRedisTemplate.keys(swuu + user.getUid()));
-                return "操作成功";
-            } else
-                return "操作失败，请重试";
+            redisUtil.deleteByPattern(tu + user.getUid() + "*");
+            redisUtil.deleteByPattern(ui + user.getUid());
+            redisUtil.deleteByPattern(swuu + user.getUid());
+            return Result.success("操作成功", null);
         } else
-            return "管理员密码错误";
+            return Result.error("操作失败，请重试", null);
     }
 }

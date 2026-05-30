@@ -16,6 +16,7 @@ import com.share.novel.base.User;
 import com.share.novel.service.NovelService;
 import com.share.novel.service.UserService;
 import com.share.novel.utils.ControllerUtil;
+import com.share.novel.utils.RedisUtil;
 import com.share.novel.utils.Result;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,30 +44,29 @@ public class UserToNovelController {
     @Autowired
     StringRedisTemplate stringRedisTemplate;
 
+    @Autowired
+    RedisUtil redisUtil;
+
     @Value("${novel.uid}")
     String nu;
 
     @Value("${show.novels.uid}")
     String snu;
 
-    //用户添加文章
     @PostMapping("/addNovel")
-    public String addNovel(HttpServletRequest httpServletRequest,@RequestBody UserToNovel userToNovel){
-        Function<Integer,String> function = uid -> {
+    public Result<?> addNovel(HttpServletRequest httpServletRequest,@RequestBody UserToNovel userToNovel){
+        Function<Integer,Result<?>> function = uid -> {
             User user = userToNovel.getUser();
             Novel novel = userToNovel.getNovel();
             String pwd = user.getPwd();
 
-            //检查密码是否正确
             LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(User::getUid, uid);
-            lambdaQueryWrapper.eq(User::getPwd, pwd);
-            boolean flag = userService.exists(lambdaQueryWrapper);
+            User storedUser = userService.getOne(lambdaQueryWrapper);
 
-            String result = new String();
-            if(flag){
+            Result<?> result;
+            if(storedUser != null && cn.hutool.crypto.digest.BCrypt.checkpw(pwd, storedUser.getPwd())){
 
-                //查找是否有同名小说
                 LambdaQueryWrapper<Novel> lambdaNovelQueryWrapper = new LambdaQueryWrapper<>();
                 lambdaNovelQueryWrapper.eq(Novel::getTitle, novel.getTitle());
                 boolean novelFlag = novelService.exists(lambdaNovelQueryWrapper);
@@ -78,8 +78,7 @@ public class UserToNovelController {
                     novel.setCreateTime();
                     result = novelService.add(novel);
 
-                    //删除用户查询小说的缓存
-                    stringRedisTemplate.delete(stringRedisTemplate.keys(nu+uid+"*"));
+                    redisUtil.deleteByPattern(nu+uid+"*");
 
                 }
             }
@@ -87,29 +86,26 @@ public class UserToNovelController {
                 result = Result.error("密码错误", "");
             return result;
         };
-        Integer uid = null;
 
-        return controllerUtil.sameFunc(httpServletRequest, uid, function);
+        return controllerUtil.sameFunc(httpServletRequest, function);
     }
 
-    //用户删除文章
     @PostMapping("/delNovel")
-    public String delNovel(HttpServletRequest httpServletRequest,@RequestBody UserToNovel userToNovel){
-        Function<Integer,String> function = uid -> {
+    public Result<?> delNovel(HttpServletRequest httpServletRequest,@RequestBody UserToNovel userToNovel){
+        Function<Integer,Result<?>> function = uid -> {
             User user = userToNovel.getUser();
             Novel novel = userToNovel.getNovel();
             String pwd = user.getPwd();
             LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
             lambdaQueryWrapper.eq(User::getUid, uid);
-            lambdaQueryWrapper.eq(User::getPwd, pwd);
-            boolean flag = userService.exists(lambdaQueryWrapper);
-            String result = new String();
-            if(flag){
+            User storedUser = userService.getOne(lambdaQueryWrapper);
+
+            Result<?> result;
+            if(storedUser != null && cn.hutool.crypto.digest.BCrypt.checkpw(pwd, storedUser.getPwd())){
                 novel.setUid(uid);
                 novel.setCreateTime();
                 result = novelService.del(novel);
 
-                //删除用户查询小说的缓存
                 stringRedisTemplate.delete(nu+uid);
                 stringRedisTemplate.delete(snu+uid);
 
@@ -118,15 +114,13 @@ public class UserToNovelController {
                 result = Result.error("密码错误", "");
             return result;
         };
-        Integer uid = null;
 
-        return controllerUtil.sameFunc(httpServletRequest, uid, function);
+        return controllerUtil.sameFunc(httpServletRequest, function);
     }
 
-    //用户举报小说
     @PostMapping("/reportNovel")
-    public String reportNovel(HttpServletRequest httpServletRequest,@RequestBody Novel novel){
-        Function<Integer,String> function = uid -> {
+    public Result<?> reportNovel(HttpServletRequest httpServletRequest,@RequestBody Novel novel){
+        Function<Integer,Result<?>> function = uid -> {
             novel.setState(2);
             boolean flag = novelService.updateById(novel);
             if(flag)
@@ -134,8 +128,7 @@ public class UserToNovelController {
 
             return Result.error("举报失败", "");
         };
-        Integer uid = null;
 
-        return controllerUtil.sameFunc(httpServletRequest, uid, function);
+        return controllerUtil.sameFunc(httpServletRequest, function);
     }
 }

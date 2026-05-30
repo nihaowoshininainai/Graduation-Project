@@ -1,6 +1,5 @@
 package com.share.novel.utils;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -23,52 +22,54 @@ public class ControllerUtil {
     @Autowired
     UserService userService;
 
-    @Autowired 
+    @Autowired
     StringRedisTemplate stringRedisTemplate;
-    
-    //专用于cookie字符串转map
-    public static Map<String,String> strToMap(String cookie){
+
+    public static Map<String, String> strToMap(String cookie) {
         return TransformUtil.strToMap(cookie, ";", "=");
     }
 
-    //专门用来检测登陆状态
-    public String testIsLogin(HttpServletRequest httpServletRequest){
-        Map<String,String> cookie = ControllerUtil.strToMap(httpServletRequest.getHeader("Cookie"));
+    public Result<?> testIsLogin(HttpServletRequest httpServletRequest) {
+        String cookieHeader = httpServletRequest.getHeader("Cookie");
+        if (cookieHeader == null || cookieHeader.isEmpty()) {
+            return Result.error("未登录，请先登录", null);
+        }
+        Map<String, String> cookie = ControllerUtil.strToMap(cookieHeader);
         String token = cookie.get("Token");
-        
-        //判断token合法性
+
+        if (token == null || token.isEmpty()) {
+            return Result.error("非合法token", null);
+        }
+
         boolean flag = JWTUtil.verify(token, key.getBytes());
-        
-        if(flag){
-            User user = JSONUtil.toBean(JWTUtil.parseToken(token).getPayload("user").toString(), User.class);
+
+        if (flag) {
+            Object payloadObj = JWTUtil.parseToken(token).getPayload("user");
+            if (payloadObj == null) {
+                return Result.error("非合法token", null);
+            }
+            User user = JSONUtil.toBean(payloadObj.toString(), User.class);
             Integer uid = user.getUid();
             Integer banned = user.getBanned();
-            if(banned==1){
+            if (banned != null && banned == 1) {
                 return Result.error("您已被封号", "");
             }
 
-            //查找redis中是否有该token
-            String exist = stringRedisTemplate.opsForValue().get("token:"+uid+":"+token);
+            String exist = stringRedisTemplate.opsForValue().get("token:" + uid + ":" + token);
 
-            if(exist!=null){
+            if (exist != null) {
                 return Result.success("Token存在", uid);
-            }
-            else
+            } else
                 return Result.error("Token已过期，请重新登陆", "");
-            
-        }
-        else
-            return Result.error("非合法token", null);  
+
+        } else
+            return Result.error("非合法token", null);
     }
 
-    //统一模板，传入特定函数执行不同功能
-    public String sameFunc(HttpServletRequest httpServletRequest,Integer uid,Function<Integer,String> function){
-        String result = testIsLogin(httpServletRequest);
-        List<String> list = Result.jsonStrtoList(result);
-        String state = list.get(0);
-        if(state.equals("1")){
-            uid = Integer.parseInt(list.get(2));
-            
+    public Result<?> sameFunc(HttpServletRequest httpServletRequest, Function<Integer, Result<?>> function) {
+        Result<?> result = testIsLogin(httpServletRequest);
+        if (result.isSuccess()) {
+            Integer uid = (Integer) result.getData();
             return function.apply(uid);
         }
         return result;

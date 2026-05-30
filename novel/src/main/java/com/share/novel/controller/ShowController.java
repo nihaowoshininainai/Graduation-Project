@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +24,6 @@ import com.share.novel.base.Comments;
 import com.share.novel.base.Novel;
 import com.share.novel.base.NovelLabel;
 import com.share.novel.base.User;
-import com.share.novel.mapper.AdminToNovelMapper;
 import com.share.novel.service.AdminService;
 import com.share.novel.service.CollectionService;
 import com.share.novel.service.CommentsService;
@@ -33,9 +33,9 @@ import com.share.novel.service.NovelLabelService;
 import com.share.novel.service.NovelService;
 import com.share.novel.service.UserService;
 import com.share.novel.utils.RandomUtil;
+import com.share.novel.utils.RedisUtil;
 import com.share.novel.utils.Result;
 
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 
 @RestController
@@ -64,13 +64,13 @@ public class ShowController {
     StringRedisTemplate stringRedisTemplate;
 
     @Autowired
+    RedisUtil redisUtil;
+
+    @Autowired
     DeepSeekService deepseek;
 
     @Autowired
     AdminService adminService;
-
-    @Autowired
-    AdminToNovelMapper adminToNovelMapper;
 
     @Value("${label.all}")
     String la;
@@ -99,102 +99,93 @@ public class ShowController {
     @Value("${show.recommend.user.uid}")
     String sruu;
 
-    // 首页小说请求
     @GetMapping("/index")
-    String show(@RequestParam(required = false) String condition, @RequestParam(required = false) String sort,
+    Result<?> show(@RequestParam(required = false) String condition, @RequestParam(required = false) String sort,
             @RequestParam("current") Integer current, @RequestParam("size") Integer size) {
 
         return novelService.index(condition, sort, current, size);
     }
 
-    // 分类小说请求
     @GetMapping("/classify")
-    String classify(@RequestParam(required = false) String condition, @RequestParam(required = false) String sort,
+    Result<?> classify(@RequestParam(required = false) String condition, @RequestParam(required = false) String sort,
             @RequestParam("current") Integer current, @RequestParam("size") Integer size,
             @RequestParam("labelId") Integer labelId) {
 
         return novelService.classify(condition, sort, current, size, labelId);
     }
 
-    // 搜索小说
     @GetMapping("/search")
-    String search(@RequestParam(required = false) String condition, @RequestParam(required = false) String sort,
+    Result<?> search(@RequestParam(required = false) String condition, @RequestParam(required = false) String sort,
             @RequestParam("current") Integer current, @RequestParam("size") Integer size,
             @RequestParam("name") String name) {
         return novelService.search(condition, sort, current, size, name);
     }
 
-    // 根据id查询用户名
     @GetMapping("/showUname")
-    String showUname(@RequestParam("id") Integer id) {
+    Result<?> showUname(@RequestParam("id") Integer id) {
 
         return userService.getUname(id);
     }
 
-    // 获取标签
     @GetMapping("/labels")
-    public String getLabel() {
-        // 查询redis中是否存有缓存
-        String result = stringRedisTemplate.opsForValue().get(la);
+    public Result<?> getLabel() {
+        String cachedJson = stringRedisTemplate.opsForValue().get(la);
 
-        if (result == null) {
-            result = Result.success("查询成功", labelService.list());
-            stringRedisTemplate.opsForValue().set(la, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+        if (cachedJson == null) {
+            Result<?> result = Result.success("查询成功", labelService.list());
+            stringRedisTemplate.opsForValue().set(la, result.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
+            return result;
         }
 
-        return result;
+        return Result.fromJson(cachedJson);
     }
 
-    // 根据用户名查询用户id
     @GetMapping("/showUid")
-    String showUid(@RequestParam("uname") String uname) {
+    Result<?> showUid(@RequestParam("uname") String uname) {
         return userService.getUid(uname);
     }
 
-    // 根据用户id查询用户信息
     @GetMapping("/showUser")
-    String showUser(@RequestParam("uid") Integer uid) {
-        // 查询redis中是否存有缓存
-        String result = stringRedisTemplate.opsForValue().get(ui + uid);
+    Result<?> showUser(@RequestParam("uid") Integer uid) {
+        String cachedJson = stringRedisTemplate.opsForValue().get(ui + uid);
 
-        if (result == null) {
+        if (cachedJson == null) {
             User user = userService.getById(uid);
             user.setPwd("");
-            result = Result.success("查询成功", user);
-            stringRedisTemplate.opsForValue().set(ui + uid, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+            Result<?> result = Result.success("查询成功", user);
+            stringRedisTemplate.opsForValue().set(ui + uid, result.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
+            return result;
         }
 
-        return result;
+        return Result.fromJson(cachedJson);
     }
 
-    // 根据用户id查询上传的小说
     @GetMapping("/showNovels")
-    String showNovels(@RequestParam("uid") Integer uid) {
-        // 查询redis中是否存有缓存
-        String result = stringRedisTemplate.opsForValue().get(snu + uid);
+    Result<?> showNovels(@RequestParam("uid") Integer uid) {
+        String cachedJson = stringRedisTemplate.opsForValue().get(snu + uid);
 
-        if (result == null) {
+        if (cachedJson == null) {
             LambdaQueryWrapper<Novel> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Novel::getUid, uid);
-            result = Result.success("查询成功", novelService.list(wrapper));
-            stringRedisTemplate.opsForValue().set(snu + uid, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+            Result<?> result = Result.success("查询成功", novelService.list(wrapper));
+            stringRedisTemplate.opsForValue().set(snu + uid, result.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
+            return result;
         }
 
-        return result;
+        return Result.fromJson(cachedJson);
     }
 
-    // 获取用户收藏
     @GetMapping("/showCollections")
-    String showNovelsLike(@RequestParam("uid") Integer uid) {
-        // 查询redis中是否存有缓存
+    Result<?> showNovelsLike(@RequestParam("uid") Integer uid) {
         String key = snlu + uid;
-        String result = stringRedisTemplate.opsForValue().get(key);
+        String cachedJson = stringRedisTemplate.opsForValue().get(key);
 
-        if (result == null) {
+        if (cachedJson == null) {
             List<Collection> collections = collectionService.getCollectionListByUserId(uid);
             if (collections.isEmpty()) {
-                result = Result.success("查询成功", "");
-                stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+                Result<?> result = Result.success("查询成功", "");
+                stringRedisTemplate.opsForValue().set(key, result.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
+                return result;
             } else {
                 List<Integer> ids = new ArrayList<>();
                 for (Collection collection : collections) {
@@ -202,55 +193,54 @@ public class ShowController {
                 }
                 LambdaQueryWrapper<Novel> wrapper = new LambdaQueryWrapper<>();
                 wrapper.in(Novel::getId, ids);
-                result = Result.success("查询成功", novelService.list(wrapper));
+                Result<?> result = Result.success("查询成功", novelService.list(wrapper));
+                stringRedisTemplate.opsForValue().set(key, result.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
+                return result;
             }
         }
 
-        return result;
+        return Result.fromJson(cachedJson);
 
     }
 
-    // 获取小说信息
     @GetMapping("/showNovel")
-    String showNovel(@RequestParam("nid") Integer nid) {
-        // 查询redis中是否存有缓存
-        String result = stringRedisTemplate.opsForValue().get(snn + nid);
+    Result<?> showNovel(@RequestParam("nid") Integer nid) {
+        String cachedJson = stringRedisTemplate.opsForValue().get(snn + nid);
 
-        if (result == null) {
+        if (cachedJson == null) {
             Novel novel = novelService.getById(nid);
-            result = Result.success("查询成功", novel);
-            stringRedisTemplate.opsForValue().set(snn + nid, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+            Result<?> result = Result.success("查询成功", novel);
+            stringRedisTemplate.opsForValue().set(snn + nid, result.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
+            return result;
         }
 
-        return result;
+        return Result.fromJson(cachedJson);
     }
 
-    // 获取小说评论
     @GetMapping("/showComments")
-    String showComments(@RequestParam("nid") Integer nid) {
-        // 查询redis中是否存有缓存
+    Result<?> showComments(@RequestParam("nid") Integer nid) {
         String key = scn + nid;
-        String result = stringRedisTemplate.opsForValue().get(key);
+        String cachedJson = stringRedisTemplate.opsForValue().get(key);
 
-        if (result == null) {
+        if (cachedJson == null) {
             LambdaQueryWrapper<Comments> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Comments::getNid, nid).and(w -> w.eq(Comments::getState, 0).or().eq(Comments::getState, 1));
 
-            result = Result.success("查询成功", commentsService.list(wrapper));
-            stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+            Result<?> result = Result.success("查询成功", commentsService.list(wrapper));
+            stringRedisTemplate.opsForValue().set(key, result.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
+            return result;
         }
 
-        return result;
+        return Result.fromJson(cachedJson);
     }
 
-    // 获取小说点赞
     @GetMapping("/showLike")
-    String showLike(@RequestParam("nid") Integer nid, @RequestParam("uid") Integer uid) {
-        // 查询redis中是否存有缓存
+    Result<?> showLike(@RequestParam("nid") Integer nid, @RequestParam("uid") Integer uid) {
         String key = snl + uid;
-        String result = stringRedisTemplate.opsForValue().get(key);
+        String cachedJson = stringRedisTemplate.opsForValue().get(key);
+        Result<?> cachedResult;
 
-        if (result == null) {
+        if (cachedJson == null) {
             LambdaQueryWrapper<Collection> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Collection::getUid, uid);
             List<Collection> collections = collectionService.list(wrapper);
@@ -259,27 +249,26 @@ public class ShowController {
                 ids.add(collection.getNid());
             }
 
-            result = Result.success("查询成功", ids);
-            stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
+            cachedResult = Result.success("查询成功", ids);
+            stringRedisTemplate.opsForValue().set(key, cachedResult.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
+        } else {
+            cachedResult = Result.fromJson(cachedJson);
         }
 
-        JSONObject resultObject = JSONUtil.parseObj(result);
-        List<Integer> ids = resultObject.getJSONArray("data").toList(Integer.class);
+        List<Integer> ids = JSONUtil.toList(JSONUtil.toJsonStr(cachedResult.getData()), Integer.class);
 
         return Result.success("查询成功", ids.contains(nid));
 
     }
 
-    // 获取用户推荐
     @GetMapping("/showRecommend")
-    String showRecommend(@RequestParam("uid") Integer uid) {
-        // 查询redis中是否存有缓存
+    Result<?> showRecommend(@RequestParam("uid") Integer uid) {
         String key = sruu + uid;
-        String result = stringRedisTemplate.opsForValue().get(key);
+        String cachedJson = stringRedisTemplate.opsForValue().get(key);
 
         synchronized (deepseek.getLock(uid)) {
-            result = stringRedisTemplate.opsForValue().get(key);
-            if (result == null) {
+            cachedJson = stringRedisTemplate.opsForValue().get(key);
+            if (cachedJson == null) {
                 LambdaQueryWrapper<Collection> wrapper = new LambdaQueryWrapper<>();
                 wrapper.eq(Collection::getUid, uid);
 
@@ -292,42 +281,48 @@ public class ShowController {
                 Map<Integer, List<Integer>> map1 = new HashMap<>();
                 Map<Integer, List<Integer>> map2 = new HashMap<>();
 
-                for (Collection collection : collections) {
-                    LambdaQueryWrapper<NovelLabel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-                    lambdaQueryWrapper.eq(NovelLabel::getNid, collection.getNid());
-                    List<NovelLabel> novelLabels = novelLabelService.list(lambdaQueryWrapper);
-                    List<Integer> list = new ArrayList<>();
-                    for (NovelLabel novelLabel : novelLabels) {
-                        list.add(novelLabel.getLid());
+                if (!collections.isEmpty()) {
+                    List<Integer> collectionNids = collections.stream().map(Collection::getNid).toList();
+                    LambdaQueryWrapper<NovelLabel> nlWrapper1 = new LambdaQueryWrapper<>();
+                    nlWrapper1.in(NovelLabel::getNid, collectionNids);
+                    List<NovelLabel> allNovelLabels1 = novelLabelService.list(nlWrapper1);
+                    map1 = allNovelLabels1.stream()
+                            .collect(Collectors.groupingBy(
+                                    NovelLabel::getNid,
+                                    Collectors.mapping(NovelLabel::getLid, Collectors.toList())));
+                    for (Integer nid : collectionNids) {
+                        map1.putIfAbsent(nid, new ArrayList<>());
                     }
-                    map1.put(collection.getNid(), list);
                 }
 
-                for (Novel novel : allNovles) {
-                    LambdaQueryWrapper<NovelLabel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-                    lambdaQueryWrapper.eq(NovelLabel::getNid, novel.getId());
-                    List<NovelLabel> novelLabels = novelLabelService.list(lambdaQueryWrapper);
-                    List<Integer> list = new ArrayList<>();
-                    for (NovelLabel novelLabel : novelLabels) {
-                        list.add(novelLabel.getLid());
+                if (!allNovles.isEmpty()) {
+                    List<Integer> novelIds = allNovles.stream().map(Novel::getId).toList();
+                    LambdaQueryWrapper<NovelLabel> nlWrapper2 = new LambdaQueryWrapper<>();
+                    nlWrapper2.in(NovelLabel::getNid, novelIds);
+                    List<NovelLabel> allNovelLabels2 = novelLabelService.list(nlWrapper2);
+                    map2 = allNovelLabels2.stream()
+                            .collect(Collectors.groupingBy(
+                                    NovelLabel::getNid,
+                                    Collectors.mapping(NovelLabel::getLid, Collectors.toList())));
+                    for (Integer nid : novelIds) {
+                        map2.putIfAbsent(nid, new ArrayList<>());
                     }
-                    map2.put(novel.getId(), list);
                 }
                 if (map1.isEmpty()) {
                     return Result.error("请先收藏小说", "");
                 }
-                result = Result.success("查询成功",
+                Result<?> result = Result.success("查询成功",
                         novelService.listByIds(JSONUtil.toList(deepseek.getRecommend(map1, map2), Integer.class)));
-                stringRedisTemplate.opsForValue().set(key, result, 1, TimeUnit.DAYS);
+                stringRedisTemplate.opsForValue().set(key, result.toJson(), 1, TimeUnit.DAYS);
+                return result;
             }
         }
 
-        return result;
+        return Result.fromJson(cachedJson);
     }
 
-    // 获取用户评论
     @GetMapping("/showUserComments")
-    String showUserComments(@RequestParam("uid") Integer uid) {
+    Result<?> showUserComments(@RequestParam("uid") Integer uid) {
 
         LambdaQueryWrapper<Comments> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Comments::getUid, uid);
@@ -335,62 +330,53 @@ public class ShowController {
         return Result.success("查询成功", commentsService.list(wrapper));
     }
 
-    /*
-     * 以下为管理端数据展示
-     */
-    // 获取被举报的文章信息
     @GetMapping("/getJvbao")
-    String showNovelJvbao() {
+    Result<?> showNovelJvbao() {
         LambdaQueryWrapper<Novel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Novel::getState, 2);
         return Result.success("查询成功", novelService.list(lambdaQueryWrapper));
     }
 
-    // 获取待审核的文章信息
     @GetMapping("/getShenhe")
-    String showNovleShenhe() {
+    Result<?> showNovleShenhe() {
         LambdaQueryWrapper<Novel> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Novel::getState, 0);
         return Result.success("查询成功", novelService.list(lambdaQueryWrapper));
     }
 
-    // 获取违规超过三次的用户信息
     @GetMapping("/getBanUsers")
-    String showBanUsers() {
-        Set<String> keys = stringRedisTemplate.keys(swuu.concat("*"));
+    Result<?> showBanUsers() {
+        Set<String> keys = redisUtil.scanKeys(swuu.concat("*"));
         Set<Integer> uids = new HashSet<>();
         if (keys.isEmpty())
             return Result.success("查询成功", "");
         else {
-            for (String key : keys) {
-                if (Integer.parseInt(stringRedisTemplate.opsForValue().get(key)) >= 3)
-                    uids.add(Integer.parseInt(key.substring(swuu.length())));
+            for (String k : keys) {
+                if (Integer.parseInt(stringRedisTemplate.opsForValue().get(k)) >= 3)
+                    uids.add(Integer.parseInt(k.substring(swuu.length())));
             }
         }
 
         return Result.success("查询成功", userService.listByIds(uids));
     }
 
-    // 获取已经封禁的用户信息
     @GetMapping("/getBannedUsers")
-    String showBannedUsers() {
+    Result<?> showBannedUsers() {
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getBanned, 1);
         return Result.success("查询成功", userService.list(lambdaQueryWrapper));
     }
 
-    // 获取被举报评论
     @GetMapping("/getJvbaoComments")
-    String getJvbaoComments() {
+    Result<?> getJvbaoComments() {
         LambdaQueryWrapper<Comments> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Comments::getState, 1);
 
         return Result.success("查询成功", commentsService.list(lambdaQueryWrapper));
     }
 
-    // 获取管理员信息
     @GetMapping("/getAdmins")
-    String getAdmins(@RequestParam String aname) {
+    Result<?> getAdmins(@RequestParam String aname) {
         LambdaQueryWrapper<Admin> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.ne(Admin::getAname, "admin");
         if (!aname.equals("admin"))
@@ -399,21 +385,18 @@ public class ShowController {
             return Result.success("查询成功", adminService.list(lambdaQueryWrapper));
     }
 
-    // 获取所有用户信息
     @GetMapping("/getAllUsers")
-    String getAllUsers() {
+    Result<?> getAllUsers() {
         return Result.success("查询成功", userService.list());
     }
 
-    // 获取所有小说信息
     @GetMapping("/getAllNovels")
-    String getAllNovels() {
+    Result<?> getAllNovels() {
         return Result.success("查询成功", novelService.list());
     }
 
-    //获取审核小说记录
     @GetMapping("/getShenheRecord")
-    String getShenheRecord() {
-        return Result.success("查询成功", adminToNovelMapper.selectList(null));
+    Result<?> getShenheRecord() {
+        return Result.success("查询成功", adminService.getShenheRecord());
     }
 }

@@ -45,9 +45,8 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
     @Value("${show.search.name}")
     String ssn;
 
-    //获取小说通用方法
-    String getNovel(String key,String condition,String sort,Integer current,Integer size,LambdaQueryWrapper<Novel> queryWrapper,String name){
-        
+    Result<?> getNovel(String redisKey,String condition,String sort,Integer current,Integer size,LambdaQueryWrapper<Novel> queryWrapper,String name){
+
         queryWrapper.in(Novel::getState, Arrays.asList(1,2));
         if(!name.equals(""))
             queryWrapper.and(q -> q.like(Novel::getTitle, name));
@@ -64,31 +63,27 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
         Page<Novel> page = new Page<>(current,size);
         IPage<Novel> iPage = novelMapper.selectPage(page, queryWrapper);
         Map<String,Object> map = Map.of("pages",iPage.getPages(),"novels",iPage.getRecords());
-        String result = Result.success("查找成功", map);
-        stringRedisTemplate.opsForValue().set(key, result, RandomUtil.getRandom(), TimeUnit.HOURS);
-        
+        Result<?> result = Result.success("查找成功", map);
+        stringRedisTemplate.opsForValue().set(redisKey, result.toJson(), RandomUtil.getRandom(), TimeUnit.HOURS);
+
         return result;
     }
 
-    String getNovel(String key,String condition,String sort,Integer current,Integer size,LambdaQueryWrapper<Novel> queryWrapper){
-        return getNovel(key, condition, sort, current, size, queryWrapper, "");
+    Result<?> getNovel(String redisKey,String condition,String sort,Integer current,Integer size,LambdaQueryWrapper<Novel> queryWrapper){
+        return getNovel(redisKey, condition, sort, current, size, queryWrapper, "");
     }
 
     @Override
-    public String add(Novel novel) {
+    public Result<?> add(Novel novel) {
         int a = novelMapper.insert(novel);
         if(a>0){
-            LambdaQueryWrapper<Novel> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Novel::getTitle, queryWrapper);
-            novelMapper.selectOne(queryWrapper);
-
             return Result.success("添加成功", novel.getId());
         }
         return Result.error("添加失败，请重试", "");
     }
 
     @Override
-    public String del(Novel novel) {
+    public Result<?> del(Novel novel) {
         int a = novelMapper.deleteById(novel);
         if(a>0)
             return Result.success("删除成功", "");
@@ -96,60 +91,55 @@ public class NovelServiceImpl extends ServiceImpl<NovelMapper,Novel> implements 
     }
 
     @Override
-    public String index(String condition,String sort,Integer current,Integer size) {
+    public Result<?> index(String condition,String sort,Integer current,Integer size) {
 
-        //先在redis中查询
-        String key = sncscs+condition+":"+sort+":"+current+":"+size;
-        String result = stringRedisTemplate.opsForValue().get(key);
+        String redisKey = sncscs+condition+":"+sort+":"+current+":"+size;
+        String cachedJson = stringRedisTemplate.opsForValue().get(redisKey);
 
-        if(result==null){
-            LambdaQueryWrapper<Novel> queryWrapper = new LambdaQueryWrapper<>();
-            result = getNovel(key, condition, sort, current, size, queryWrapper);
-        }   
-        
-
-        return result;
-    }
-
-    @Override
-    public String classify(String condition,String sort,Integer current,Integer size,Integer labelId) {
-        //先在redis中查询
-        String key = snclscs+condition+":"+sort+":"+current+":"+size+":"+labelId;
-        String result = stringRedisTemplate.opsForValue().get(key);
-
-        if(result==null){
-            LambdaQueryWrapper<NovelLabel> novelLabelQueryWrapper = new LambdaQueryWrapper<>();
-            novelLabelQueryWrapper.eq(NovelLabel::getLid, labelId);
-            List<NovelLabel> list = novelLabelMapper.selectList(novelLabelQueryWrapper);
-
-            if(list.isEmpty())
-                return Result.error("该标签下没有小说", "");
-
-            LambdaQueryWrapper<Novel> novelQueryWrapper = new LambdaQueryWrapper<>();
-            List<Integer> nids = new ArrayList<>();
-            for (NovelLabel novelLabel : list) {
-                nids.add(novelLabel.getNid());
-            }
-            novelQueryWrapper.in(Novel::getId, nids);
-
-            result = getNovel(key, condition, sort, current, size, novelQueryWrapper);
-        }   
-        
-
-        return result;
-    }
-
-    @Override
-    public String search(String condition,String sort,Integer current,Integer size,String keyword) {
-        //先在redis中查询
-        String key = ssn+keyword;
-        String result = stringRedisTemplate.opsForValue().get(key);
-
-        if(result==null){
-            LambdaQueryWrapper<Novel> queryWrapper = new LambdaQueryWrapper<>();
-            result = getNovel(key, condition, sort, current, size, queryWrapper, keyword);
+        if(cachedJson != null){
+            return Result.fromJson(cachedJson);
         }
 
-        return result;
+        LambdaQueryWrapper<Novel> queryWrapper = new LambdaQueryWrapper<>();
+        return getNovel(redisKey, condition, sort, current, size, queryWrapper);
+    }
+
+    @Override
+    public Result<?> classify(String condition,String sort,Integer current,Integer size,Integer labelId) {
+        String redisKey = snclscs+condition+":"+sort+":"+current+":"+size+":"+labelId;
+        String cachedJson = stringRedisTemplate.opsForValue().get(redisKey);
+
+        if(cachedJson != null){
+            return Result.fromJson(cachedJson);
+        }
+
+        LambdaQueryWrapper<NovelLabel> novelLabelQueryWrapper = new LambdaQueryWrapper<>();
+        novelLabelQueryWrapper.eq(NovelLabel::getLid, labelId);
+        List<NovelLabel> list = novelLabelMapper.selectList(novelLabelQueryWrapper);
+
+        if(list.isEmpty())
+            return Result.error("该标签下没有小说", "");
+
+        LambdaQueryWrapper<Novel> novelQueryWrapper = new LambdaQueryWrapper<>();
+        List<Integer> nids = new ArrayList<>();
+        for (NovelLabel novelLabel : list) {
+            nids.add(novelLabel.getNid());
+        }
+        novelQueryWrapper.in(Novel::getId, nids);
+
+        return getNovel(redisKey, condition, sort, current, size, novelQueryWrapper);
+    }
+
+    @Override
+    public Result<?> search(String condition,String sort,Integer current,Integer size,String keyword) {
+        String redisKey = ssn+condition+":"+sort+":"+current+":"+size+":"+keyword;
+        String cachedJson = stringRedisTemplate.opsForValue().get(redisKey);
+
+        if(cachedJson != null){
+            return Result.fromJson(cachedJson);
+        }
+
+        LambdaQueryWrapper<Novel> queryWrapper = new LambdaQueryWrapper<>();
+        return getNovel(redisKey, condition, sort, current, size, queryWrapper, keyword);
     }
 }
