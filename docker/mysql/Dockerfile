@@ -1,4 +1,3 @@
-FROM mysql:latest
+FROM mysql:8.0
 
-COPY create-db.sql /docker-entrypoint-initdb.d
-COPY table.sql /docker-entrypoint-initdb.d
+COPY table.sql /docker-entrypoint-initdb.d/01-tables.sql

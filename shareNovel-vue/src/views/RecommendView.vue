@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Novel, Result, User } from '@/baseType'
+import type { Novel, Result } from '@/baseType'
 import { getNovelRecommend } from '@/request/novel'
 import { getUname } from '@/request/user'
 import { getStoredUser, isLoggedIn } from '@/request'

@@ -6,7 +6,7 @@
         <h2 class="form-title">用户注册</h2>
         <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
           <el-form-item label="用户名" prop="username">
-            <el-input v-model="form.username" placeholder="请输入用户名" :prefix-icon="User" />
+            <el-input v-model="form.username" placeholder="请输入用户名" :prefix-icon="UserIcon" />
           </el-form-item>
           <el-form-item label="密码" prop="password">
             <el-input v-model="form.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password />
@@ -32,8 +32,8 @@ import { reactive, ref } from 'vue'
 import { register, getUid } from '@/request/user'
 import router from '@/router'
 import type { FormInstance, FormRules } from 'element-plus'
-import type { Result, User } from '@/baseType'
-import { User, Lock } from '@element-plus/icons-vue'
+import type { Result } from '@/baseType'
+import { User as UserIcon, Lock } from '@element-plus/icons-vue'
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
