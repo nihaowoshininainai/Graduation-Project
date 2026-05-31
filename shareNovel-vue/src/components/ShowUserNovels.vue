@@ -1,92 +1,75 @@
-<!-- 用户小说 -->
 <template>
-    <el-table :data="novels" border>
-        <el-table-column prop="title" label="小说名" />
-        <el-table-column prop="createTime" label="创作时间" />
-        <el-table-column prop="views" label="浏览量" />
-        <el-table-column prop="state" :formatter="(row: Novel) => {
-            switch (row.state) {
-                case 0:
-                    return '待审核'
-                case 1:
-                    return '已上架'
-                case -1:
-                    return '审核未通过'
-                case 2:
-                    return '被举报'
-                case 3:
-                    return '已下架'
-                default:
-                    return '未知状态'
-            }
-
-        }" label="状态" />
-        <el-table-column v-if="flag">
-            <template #default="scope">
-                <el-button type="danger" @click="deleteNovel(scope.row)">删除</el-button>
-                <el-button @click="modifyNovel(scope.row)">修改</el-button>
-            </template>
-        </el-table-column>
+  <div class="user-novels">
+    <el-table :data="novels" stripe style="width: 100%">
+      <el-table-column prop="title" label="小说名" min-width="200" />
+      <el-table-column prop="createTime" label="创作时间" width="160" />
+      <el-table-column prop="views" label="浏览量" width="100" />
+      <el-table-column label="状态" width="120">
+        <template #default="{ row }">
+          <el-tag :type="stateTagType(row.state)" size="small">{{ stateText(row.state) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="isSelf" label="操作" width="180">
+        <template #default="scope">
+          <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
     </el-table>
-    <el-drawer v-model="drawer" title="I am the title" :with-header="false">
-        <ModifyNovel :novel="novell" />
-    </el-drawer>
-
+  </div>
 </template>
+
 <script setup lang="ts">
-import type { Novel, Result, User } from '@/baseType';
-import { getUserNovel } from '@/request/novel';
-import { delNovel } from '@/request/novel'
-import { ref } from 'vue';
-import ModifyNovel from './ModifyNovel.vue';
+import type { Novel, Result, User } from '@/baseType'
+import { getUserNovel, delNovel } from '@/request/novel'
+import { getStoredUser } from '@/request'
+import { ref, onMounted } from 'vue'
 
-const props = defineProps<{
-    id: number
-}>()
-
-const user: User = JSON.parse(localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) as string) as User
-const flag = ref(false)
-if (user.uid === Number(props.id)) {
-    flag.value = true
-}
-
-const novell = ref<Novel>({
-    title: '',
-    content: ''
-})
-
-const drawer = ref(false)
+const props = defineProps<{ id: number }>()
 
 const novels = ref<Novel[]>([])
-getUserNovel(props.id).then(res => {
-    const result: Result = res.data
+const isSelf = ref(false)
+
+const stateText = (state?: number) => {
+  const map: Record<number, string> = { 0: '待审核', 1: '已上架', '-1': '审核未通过', 2: '被举报', 3: '已下架' }
+  return map[state ?? -2] || '未知'
+}
+
+const stateTagType = (state?: number) => {
+  const map: Record<number, string> = { 0: 'warning', 1: 'success', '-1': 'danger', 2: 'danger', 3: 'info' }
+  return (map[state ?? -2] || 'info') as any
+}
+
+const fetchNovels = async () => {
+  const res = await getUserNovel(props.id)
+  const result: Result = res.data
+  if (result.state === '1') {
     novels.value = result.data
+  }
+}
+
+const handleDelete = (novel: Novel) => {
+  ElMessageBox.prompt('请输入密码确认删除', '删除小说', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputType: 'password',
+    inputPattern: /\S/,
+    inputErrorMessage: '密码不能为空',
+  }).then(async ({ value: pwd }) => {
+    const user: User = { uname: '', pwd }
+    const res = await delNovel(novel, user)
+    const result: Result = res.data
+    if (result.state === '1') {
+      ElMessage.success(result.message)
+      fetchNovels()
+    } else {
+      ElMessage.error(result.message)
+    }
+  }).catch(() => {})
+}
+
+onMounted(() => {
+  const stored = getStoredUser()
+  isSelf.value = stored?.uid === props.id
+  fetchNovels()
 })
-
-const deleteNovel = (novel: Novel) => {
-    ElMessageBox.prompt('请输入密码', '删除小说', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputType: 'password'
-    }).then(({ value }) => {
-        const user: User = {
-            pwd: value,
-            uname: ''
-        }
-        delNovel(novel, user).then(res => {
-            const result: Result = res.data
-            if (result.state === '1')
-                ElMessage.success(result.message)
-            else
-                ElMessage.error(result.message)
-
-        })
-    })
-}
-
-const modifyNovel = (novel: Novel) => {
-    drawer.value = true
-    novell.value = novel
-}
-
 </script>

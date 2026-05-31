@@ -1,64 +1,108 @@
-<!-- 这是文章管理 -->
 <template>
-  搜索框：
-  <el-input style="width: 200px;" v-model="search" placeholder="请输入标题" />
-  <el-table :data="filterNovels">
-    <el-table-column prop="title" label="标题" />
-    <el-table-column prop="createTime" label="创建时间" />
-    <el-table-column prop="uid" label="用户id" />
-    <el-table-column prop="state" label="状态">
-      <template #default="{ row }">
-        {{ map.get(row.state) }}
-      </template>
-    </el-table-column>
-    <el-table-column>
-      <template #default="scope">
-          <el-button type="danger" @click="delNovel(scope.row)">删除</el-button>
-          <el-button type="primary" @click="changePwd(scope.row)">查看小说</el-button>
-      </template>
-    </el-table-column>
-  </el-table>
+  <div class="article-manage">
+    <div class="page-header">
+      <h3>文章管理</h3>
+      <el-input v-model="search" placeholder="搜索标题" style="width: 240px;" clearable :prefix-icon="Search" />
+    </div>
+    <el-table :data="filteredNovels" stripe>
+      <el-table-column prop="title" label="标题" min-width="200" />
+      <el-table-column prop="uid" label="作者ID" width="100" />
+      <el-table-column prop="createTime" label="创建时间" width="160" />
+      <el-table-column label="状态" width="140">
+        <template #default="{ row }">
+          <el-tag :type="stateTagType(row.state)" size="small">{{ stateText(row.state) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="200">
+        <template #default="scope">
+          <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button type="primary" size="small" @click="handleView(scope.row)">查看</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <el-dialog v-model="viewDialog" :title="viewNovel?.title" width="700px">
+      <div v-html="viewNovel?.content" style="max-height: 500px; overflow-y: auto;"></div>
+    </el-dialog>
+  </div>
 </template>
-<script lang="ts" setup>
-import { type Admin, type Novel, type Result } from '@/baseType';
-import { deleteNovel, getAllNovels } from '@/request/novel';
-import { computed, ref } from 'vue';
+
+<script setup lang="ts">
+import type { Novel, Result } from '@/baseType'
+import { getAllNovels, deleteNovelByAdmin } from '@/request/novel'
+import { ref, computed, onMounted } from 'vue'
+import { Search } from '@element-plus/icons-vue'
 
 const search = ref('')
-
-const filterNovels = computed(() => {
-  return novels.value.filter((novel) => {
-    if(search.value==='') return true
-    return novel.title.includes(search.value)
-  })
-})
-
 const novels = ref<Novel[]>([])
-getAllNovels.then((res) => {
-  const result:Result = res.data
-  novels.value = result.data
-})
-const map = new Map<number, string>()
-map.set(0, '待审核')
-map.set(-1, '审核不通过')
-map.set(1, '正常')
-map.set(2,'被举报')
-map.set(3,'举报核实，被管理员下架')
+const viewDialog = ref(false)
+const viewNovel = ref<Novel | null>(null)
 
-const delNovel = (novel:Novel)=>{
-
-  ElMessageBox.prompt('请输入管理员密码', '提示', {
-    cancelButtonText: '取消',
-    confirmButtonText: '确定',
-    inputType: 'password',
-  }).then(({ value }) => {
-    const admin = JSON.parse(localStorage.getItem('admin') as string) as Admin
-    admin.pwd = value
-    console.log(admin);
-    
-    deleteNovel(admin,novel).then((res)=>{
-      ElMessage.warning(res.data)
-    })
-  })
+const stateText = (state?: number) => {
+  const map: Record<number, string> = { 0: '待审核', '-1': '审核不通过', 1: '正常', 2: '被举报', 3: '已下架' }
+  return map[state ?? -2] || '未知'
 }
+
+const stateTagType = (state?: number) => {
+  const map: Record<number, string> = { 0: 'warning', '-1': 'danger', 1: 'success', 2: 'danger', 3: 'info' }
+  return (map[state ?? -2] || 'info') as any
+}
+
+const filteredNovels = computed(() => {
+  if (!search.value) return novels.value
+  return novels.value.filter(n => n.title.includes(search.value))
+})
+
+const fetchNovels = async () => {
+  const res = await getAllNovels()
+  const result: Result = res.data
+  if (result.state === '1') {
+    novels.value = result.data
+  }
+}
+
+const handleDelete = async (novel: Novel) => {
+  try {
+    await ElMessageBox.confirm(`确定删除小说 "${novel.title}" 吗？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+    const res = await deleteNovelByAdmin({ id: novel.id, title: '' } as Novel)
+    const result: Result = res.data
+    if (result.state === '1') {
+      ElMessage.success(result.message)
+      fetchNovels()
+    } else {
+      ElMessage.error(result.message)
+    }
+  } catch {
+    // cancelled
+  }
+}
+
+const handleView = (novel: Novel) => {
+  viewNovel.value = novel
+  viewDialog.value = true
+}
+
+onMounted(() => {
+  fetchNovels()
+})
 </script>
+
+<style lang="less" scoped>
+.article-manage {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+  }
+}
+</style>

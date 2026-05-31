@@ -1,45 +1,41 @@
-<!-- 这是用户页 -->
-<script setup lang="ts">
-import type { User } from '@/baseType';
-import { ref } from 'vue';
-
-const props = defineProps<{
-    id: string
-}>()
-const user: User = JSON.parse(localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) as string) as User
-const flag = ref(false)
-if (user.uid === Number(props.id)) {
-    flag.value = true
-}
-</script>
 <template>
-    <el-tabs type="border-card" v-if="flag">
-        <el-tab-pane label="基本信息">
-            <UserInfo :uid="Number(id)"></UserInfo>
-        </el-tab-pane>
-        <el-tab-pane label="我的作品">
-            <ShowUserNovels :id="Number(id)"></ShowUserNovels>
-        </el-tab-pane>
-        <el-tab-pane label="我的收藏">
-            <ShowCollectNovels :uid="Number(id)"></ShowCollectNovels>
-        </el-tab-pane>
-        <el-tab-pane label="我的评论">
-            <UserComments></UserComments>
-        </el-tab-pane>
-        <el-tab-pane label="上传作品">
-            <UploadNovel></UploadNovel>
-        </el-tab-pane>
+  <div class="user-page">
+    <el-tabs v-model="activeTab" type="border-card">
+      <el-tab-pane label="基本信息" name="info">
+        <UserInfo :uid="Number(id)" />
+      </el-tab-pane>
+      <el-tab-pane :label="isSelf ? '我的作品' : '他的作品'" name="novels">
+        <ShowUserNovels :id="Number(id)" />
+      </el-tab-pane>
+      <el-tab-pane :label="isSelf ? '我的收藏' : '他的收藏'" name="collections">
+        <ShowCollectNovels :uid="Number(id)" />
+      </el-tab-pane>
+      <el-tab-pane v-if="isSelf" label="我的评论" name="comments">
+        <UserComments />
+      </el-tab-pane>
+      <el-tab-pane v-if="isSelf" label="上传作品" name="upload">
+        <UploadNovel />
+      </el-tab-pane>
     </el-tabs>
-
-    <el-tabs type="border-card" v-if="!flag">
-        <el-tab-pane label="基本信息">
-            <UserInfo :uid="Number(id)"></UserInfo>
-        </el-tab-pane>
-        <el-tab-pane label="他的作品">
-            <ShowUserNovels :id="Number(id)"></ShowUserNovels>
-        </el-tab-pane>
-        <el-tab-pane label="他的收藏">
-            <ShowCollectNovels :uid="Number(id)"></ShowCollectNovels>
-        </el-tab-pane>
-    </el-tabs>
+  </div>
 </template>
+
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { getStoredUser } from '@/request'
+
+const props = defineProps<{ id: string }>()
+const activeTab = ref('info')
+const isSelf = computed(() => {
+  const user = getStoredUser()
+  return user?.uid === Number(props.id)
+})
+</script>
+
+<style lang="less" scoped>
+.user-page {
+  :deep(.el-tabs__content) {
+    padding: 20px;
+  }
+}
+</style>

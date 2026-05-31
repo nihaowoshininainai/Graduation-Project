@@ -1,4 +1,5 @@
-import request from ".";
+import request from '.'
 
-//获取标签
-export const getLabels = request.get("labels")
+export const getLabels = () => {
+  return request.get('labels')
+}

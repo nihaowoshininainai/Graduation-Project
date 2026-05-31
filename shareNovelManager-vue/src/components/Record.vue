@@ -1,25 +1,45 @@
-<!-- 审核记录 -->
- <template>
-    <el-tabs v-model="activeName" @tab-click="handleClick">
-        <el-tab-pane label="审核文章记录" name="审核文章记录">
-            <RecordOne></RecordOne>
-        </el-tab-pane>
-        <el-tab-pane label="审核用户记录" name="审核用户记录">
-            
-        </el-tab-pane>
-        <el-tab-pane label="审核评论记录" name="审核评论记录">
-            
-        </el-tab-pane>
+<template>
+  <div class="record-page">
+    <h3>审核记录</h3>
+    <el-tabs v-model="activeTab">
+      <el-tab-pane label="小说审核记录" name="novel">
+        <el-table :data="records" stripe>
+          <el-table-column prop="record" label="审核记录" min-width="300" />
+          <el-table-column prop="createTime" label="审核时间" width="180" />
+        </el-table>
+      </el-tab-pane>
+      <el-tab-pane label="评论审核记录" name="comment">
+        <el-empty description="暂无数据" />
+      </el-tab-pane>
+      <el-tab-pane label="用户操作记录" name="user">
+        <el-empty description="暂无数据" />
+      </el-tab-pane>
     </el-tabs>
- </template>
- <script setup lang="ts">
-import type { TabsPaneContext } from 'element-plus'
-import { ref } from 'vue'
+  </div>
+</template>
 
-const activeName = ref('审核文章记录')
-const name = ref('审核文章记录')
+<script setup lang="ts">
+import type { AdminToNovel, Result } from '@/baseType'
+import { getArticleRecord } from '@/request/admin'
+import { ref, onMounted } from 'vue'
 
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-    name.value = tab.paneName as string
-}
+const activeTab = ref('novel')
+const records = ref<AdminToNovel[]>([])
+
+onMounted(async () => {
+  const res = await getArticleRecord()
+  const result: Result = res.data
+  if (result.state === '1') {
+    records.value = result.data
+  }
+})
 </script>
+
+<style lang="less" scoped>
+.record-page {
+  h3 {
+    margin: 0 0 16px;
+    font-size: 18px;
+  }
+}
+</style>

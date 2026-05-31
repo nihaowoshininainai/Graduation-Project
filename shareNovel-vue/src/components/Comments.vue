@@ -1,153 +1,259 @@
-<!-- 评论部分 -->
 <template>
-    <el-row style="width: 100%;">
-        <el-col style="justify-content: left;">评论区</el-col>
-        <el-col>
-            <el-input type="textarea" v-model="input" placeholder="来点友好评论吧" @keydown.enter="addCom" />
-            <el-button type="primary" @click="addCom" :disabled="input === '' ? true : false">发送</el-button>
-        </el-col>
-        <el-col style="justify-content: left;" v-for="comment in comments" :key="comment.id">
-            <el-row style="width: 100%;border: 1px solid #ccc;margin-top: 10px;padding: 10px;">
-                <el-col style="justify-content: left;">来自用户“{{ comment.uid }}”的评论：</el-col>
-                <el-col style="justify-content: left;">{{ comment.content }}</el-col>
-                <el-col>
-                    <svg v-show="!ifLike.get(comment.id as number)" @click="addLike(comment.id as number)"
-                        xmlns="http://www.w3.org/2000/svg" width="21" height="21"
-                        viewBox="0 0 14 14">-show="getCommentLike(comment.id as number,user.uid as number)"
-                        xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 14 14">
-                        <path fill="#999999" fill-rule="evenodd"
-                            d="M4.41 12.961a2.5 2.5 0 0 0 1.076.244h5.346a2.5 2.5 0 0 0 2.47-2.114l.626-4.003a2 2 0 0 0-1.976-2.31H8.67V2.422a1.625 1.625 0 0 0-3.044-.794l-2.077 3.71a1.5 1.5 0 0 0-.191.733v5.442a1.5 1.5 0 0 0 .854 1.354l.2.095Zm-3.366-7.44a.996.996 0 0 0-.997.996v5.112a.997.997 0 0 0 .997.997h.496a.5.5 0 0 0 .5-.5V6.02a.5.5 0 0 0-.5-.5h-.496Z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <svg v-show="ifLike.get(comment.id as number)" @click="delLike(comment.id as number)"
-                        xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 14 14">
-                        <path fill="#e11d48" fill-rule="evenodd"
-                            d="M4.41 12.961a2.5 2.5 0 0 0 1.076.244h5.346a2.5 2.5 0 0 0 2.47-2.114l.626-4.003a2 2 0 0 0-1.976-2.31H8.67V2.422a1.625 1.625 0 0 0-3.044-.794l-2.077 3.71a1.5 1.5 0 0 0-.191.733v5.442a1.5 1.5 0 0 0 .854 1.354l.2.095Zm-3.366-7.44a.996.996 0 0 0-.997.996v5.112a.997.997 0 0 0 .997.997h.496a.5.5 0 0 0 .5-.5V6.02a.5.5 0 0 0-.5-.5h-.496Z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    <el-button link size="small" @click="reportButton(comment)">举报</el-button>
-                </el-col>
-            </el-row>
-        </el-col>
-    </el-row>
+  <div class="comments-section">
+    <h3 class="section-title">评论区</h3>
+    <div class="comment-input" v-if="isLoggedIn()">
+      <el-input
+        type="textarea"
+        v-model="inputText"
+        placeholder="来点友好评论吧..."
+        :rows="3"
+        maxlength="500"
+        show-word-limit
+      />
+      <el-button type="primary" :disabled="!inputText.trim()" @click="handleAddComment" style="margin-top: 8px;">
+        发送评论
+      </el-button>
+    </div>
+    <el-alert v-else type="info" :closable="false" style="margin-bottom: 16px;">
+      <template #title>请先登录后参与评论</template>
+    </el-alert>
+
+    <div class="comment-list">
+      <div v-for="comment in comments" :key="comment.id" class="comment-item">
+        <div class="comment-header">
+          <el-avatar :size="28" class="comment-avatar">{{ getUnameById(comment.uid)?.charAt(0) || '?' }}</el-avatar>
+          <span class="comment-author">{{ getUnameById(comment.uid) || `用户${comment.uid}` }}</span>
+          <span class="comment-time">{{ comment.createTime || '' }}</span>
+        </div>
+        <div class="comment-body">{{ comment.content }}</div>
+        <div class="comment-actions">
+          <span class="action-btn" @click="handleLikeComment(comment)">
+            <el-icon :color="likeMap.get(comment.id!) ? '#e11d48' : '#999'">
+              <StarFilled v-if="likeMap.get(comment.id!)" />
+              <Star v-else />
+            </el-icon>
+            {{ likeMap.get(comment.id!) ? '已赞' : '点赞' }}
+          </span>
+          <span v-if="isOwnComment(comment)" class="action-btn danger" @click="handleDeleteComment(comment.id!)">
+            删除
+          </span>
+        </div>
+      </div>
+      <el-empty v-if="comments.length === 0" description="暂无评论" />
+    </div>
+  </div>
 </template>
+
 <script setup lang="ts">
-import type { Comments, Result, User } from '@/baseType';
-import { addComment, getComments, reportComments } from '@/request/comments';
-import { addCommentLike, deleteCommentLike, getCommentLike } from '@/request/commentslike';
-import router from '@/router';
-import { ref } from 'vue';
+import type { Comments, Result } from '@/baseType'
+import { getComments, addComment, delComments } from '@/request/comments'
+import { addCommentLike, deleteCommentLike, getCommentLike } from '@/request/commentslike'
+import { getUname as fetchUname } from '@/request/user'
+import { isLoggedIn, getStoredUser } from '@/request'
+import router from '@/router'
+import { ref, onMounted } from 'vue'
+import { Star, StarFilled } from '@element-plus/icons-vue'
 
-const props = defineProps<{
-    id: number
-}>()
-const input = ref('')
+const props = defineProps<{ id: number }>()
+
+const inputText = ref('')
 const comments = ref<Comments[]>([])
+const likeMap = ref<Map<number, boolean>>(new Map())
+const unameMap = ref<Map<number, string>>(new Map())
 
-const ifLike = ref<Map<number, boolean>>(new Map())
-
-const userExist = localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER)
-const user: User = JSON.parse(userExist as string)
-const aComments = ref<Comments>({
-    nid: props.id,
-    uid: -1,
-    content: ''
-})
-
-const getLike = (cid: number, uid: number) => {
-    getCommentLike(cid, uid).then(res => {
-        const result = res.data
-        if (import.meta.env.DEV)
-            console.log(ifLike.value)
-        ifLike.value.set(cid, result)
-    })
+const getUnameById = (uid?: number) => {
+  if (!uid) return ''
+  return unameMap.value.get(uid)
 }
 
-const getCom = () => {
-    getComments(props.id).then(res => {
-        const result: Result = res.data
-        if (result.state === '1') {
-            comments.value = result.data
-            comments.value.forEach((comment) => {
-                if (userExist)
-                    getLike(comment.id as number, user.uid as number)
+const isOwnComment = (comment: Comments) => {
+  const user = getStoredUser()
+  return user?.uid === comment.uid
+}
+
+const fetchComments = async () => {
+  const res = await getComments(props.id)
+  const result: Result = res.data
+  if (result.state === '1') {
+    comments.value = result.data
+    comments.value.forEach((comment) => {
+      if (comment.uid && !unameMap.value.has(comment.uid)) {
+        fetchUname(comment.uid).then((res) => {
+          const r: Result = res.data
+          if (r.state === '1') unameMap.value.set(comment.uid!, r.data)
+        })
+      }
+    })
+    if (isLoggedIn()) {
+      const user = getStoredUser()
+      if (user?.uid) {
+        comments.value.forEach((comment) => {
+          if (comment.id) {
+            getCommentLike(comment.id, user.uid as number).then((res) => {
+              likeMap.value.set(comment.id!, res.data)
             })
-        }
-    })
-}
-
-const addCom = () => {
-    if (!userExist)
-        ElMessage.error({
-            message: '请先登录',
-            duration: 1000,
-            onClose: () => {
-                router.push('/login')
-            }
+          }
         })
-    else {
-        aComments.value.content = input.value
-        aComments.value.uid = user.uid as number
-        addComment(aComments.value).then(res => {
-            const result: Result = res.data
-            if (result.state === '0')
-                ElMessage.error({
-                    message: result.message,
-                    duration: 1000,
-                    onClose: () => {
-                        input.value = ''
-                    }
-                })
-            else {
-                input.value = ''
-                getCom()
-            }
-        }
-        )
+      }
     }
+  }
 }
 
-const addLike = (cid: number) => {
-    if (userExist) {
-        addCommentLike(cid).then(res => {
-            const result: Result = res.data
-            if (result.state === '1')
-                ifLike.value.set(cid, true)
-            else
-                ElMessage.error(result.message)
-        })
-    } else
-        ElMessage.error({
-            message: '请先登录',
-            duration: 1000,
-            onClose: () => {
-                router.push('/login')
-            }
-        })
+const handleAddComment = async () => {
+  if (!inputText.value.trim()) return
+  const user = getStoredUser()
+  if (!user?.uid) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+  const res = await addComment({ nid: props.id, uid: user.uid, content: inputText.value.trim() })
+  const result: Result = res.data
+  if (result.state === '1') {
+    inputText.value = ''
+    ElMessage.success('评论成功')
+    fetchComments()
+  } else {
+    ElMessage.error(result.message)
+  }
 }
 
-const delLike = (cid: number) => {
-    deleteCommentLike(cid).then(res => {
-        const result: Result = res.data
-        if (result.state === '1')
-            ifLike.value.set(cid, false)
+const handleLikeComment = async (comment: Comments) => {
+  if (!isLoggedIn()) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+  if (!comment.id) return
+  try {
+    if (likeMap.value.get(comment.id)) {
+      const res = await deleteCommentLike(comment.id)
+      const result: Result = res.data
+      if (result.state === '1') {
+        likeMap.value.set(comment.id, false)
+      }
+    } else {
+      const res = await addCommentLike(comment.id)
+      const result: Result = res.data
+      if (result.state === '1') {
+        likeMap.value.set(comment.id, true)
+      }
     }
-    )
+  } catch {
+    ElMessage.error('操作失败')
+  }
 }
 
-const reportButton = (comments:Comments)=>{
-    reportComments(comments).then(res=>{
-        const result:Result=res.data
-        if(result.state==='1')
-            ElMessage.success(result.message)
-        else
-            ElMessage.error(result.message)
+const handleDeleteComment = async (id: number) => {
+  try {
+    await ElMessageBox.confirm('确定删除该评论吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
     })
+    const res = await delComments(id)
+    const result: Result = res.data
+    if (result.state === '1') {
+      ElMessage.success(result.message)
+      fetchComments()
+    } else {
+      ElMessage.error(result.message)
+    }
+  } catch {
+    // cancelled
+  }
 }
-getCom()
+
+onMounted(() => {
+  fetchComments()
+})
 </script>
+
 <style lang="less" scoped>
-.el-col{
-    margin-bottom: 10px;
+.comments-section {
+  max-width: 800px;
+  margin: 30px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 20px;
+  color: #303133;
+}
+
+.comment-input {
+  margin-bottom: 24px;
+}
+
+.comment-list {
+  .comment-item {
+    padding: 16px 0;
+    border-bottom: 1px solid #f5f5f5;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+
+      .comment-avatar {
+        background: var(--el-color-primary-light-3);
+        color: #fff;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+
+      .comment-author {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+      }
+
+      .comment-time {
+        font-size: 12px;
+        color: #bbb;
+        margin-left: auto;
+      }
+    }
+
+    .comment-body {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+      padding-left: 36px;
+    }
+
+    .comment-actions {
+      display: flex;
+      gap: 16px;
+      padding-left: 36px;
+      margin-top: 8px;
+
+      .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.2s;
+
+        &:hover {
+          color: var(--el-color-primary);
+        }
+
+        &.danger:hover {
+          color: var(--el-color-danger);
+        }
+      }
+    }
+  }
 }
 </style>

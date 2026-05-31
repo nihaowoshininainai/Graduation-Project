@@ -1,49 +1,64 @@
 <template>
-    <el-table :data="comments" border>
-        <el-table-column prop="nid" label="小说id" />
-        <el-table-column prop="uid" label="用户id" />
-        <el-table-column prop="content" label="评论内容" />
-        <el-table-column prop="state" :formatter="(row: Comments) => {
-            switch (row.state) {
-                case 0:
-                    return '正常'
-                case 1:
-                    return '被举报'
-                case -1:
-                    return '被封禁'
-                default:
-                    return '未知状态'
-            }
-
-        }" label="状态" />
-        <el-table-column>
-            <template #default="scope">
-                <el-button type="danger" @click="deleteNovel(scope.row)">删除</el-button>
-                <el-button @click="modifyNovel(scope.row)">修改</el-button>
-            </template>
-        </el-table-column>
+  <div class="user-comments">
+    <el-table :data="comments" stripe style="width: 100%">
+      <el-table-column prop="nid" label="小说ID" width="100" />
+      <el-table-column prop="content" label="评论内容" min-width="300" />
+      <el-table-column label="状态" width="120">
+        <template #default="{ row }">
+          <el-tag :type="row.state === 0 ? 'success' : row.state === 1 ? 'warning' : 'danger'" size="small">
+            {{ row.state === 0 ? '正常' : row.state === 1 ? '被举报' : '封禁' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="100">
+        <template #default="scope">
+          <el-button type="danger" size="small" @click="handleDelete(scope.row.id)">删除</el-button>
+        </template>
+      </el-table-column>
     </el-table>
+  </div>
 </template>
+
 <script setup lang="ts">
-import { type Comments, type Result, type User } from '@/baseType';
-import { getUserComments, delComments } from '@/request/comments';
-import { ref } from 'vue';
+import type { Comments, Result } from '@/baseType'
+import { getUserComments, delComments } from '@/request/comments'
+import { getStoredUser } from '@/request'
+import { ref, onMounted } from 'vue'
 
 const comments = ref<Comments[]>([])
-const user = JSON.parse(localStorage.getItem('user') as string) as User
 
-getUserComments(user.uid as number).then(res => {
-    const result: Result = res.data
+const fetchComments = async () => {
+  const user = getStoredUser()
+  if (!user?.uid) return
+  const res = await getUserComments(user.uid)
+  const result: Result = res.data
+  if (result.state === '1') {
     comments.value = result.data
-})
-
-const deleteNovel = (row: Comments) => {
-    delComments(row).then(res => {
-        const result: Result = res.data
-        if (result.state === '1')
-            ElMessage.success(result.message)
-        else
-            ElMessage.error(result.message)
-    })
+  }
 }
+
+const handleDelete = async (id?: number) => {
+  if (!id) return
+  try {
+    await ElMessageBox.confirm('确定删除该评论吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+    const res = await delComments(id)
+    const result: Result = res.data
+    if (result.state === '1') {
+      ElMessage.success(result.message)
+      fetchComments()
+    } else {
+      ElMessage.error(result.message)
+    }
+  } catch {
+    // cancelled
+  }
+}
+
+onMounted(() => {
+  fetchComments()
+})
 </script>

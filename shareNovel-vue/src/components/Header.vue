@@ -1,69 +1,143 @@
-<!-- 这是导航栏 -->
 <template>
-    <el-row>
-        <el-col :span="6">小说分享网站</el-col>
-        <el-col :span="6" style="display: flex;justify-content: space-around;">
-            <RouterLink to="/">
-                <el-link>首页</el-link>
-            </RouterLink>
-            <RouterLink to="/classify/page/1">
-                <el-link>分类</el-link>
-            </RouterLink>
-            <RouterLink to="/recommend">
-                <el-link>推荐</el-link>
-            </RouterLink>
-        </el-col>
-        <el-col :span="6" style="display: flex;">
-            <el-input size="small" placeholder="请输入内容" v-model="input" @keydown.enter="search"></el-input>
-            <el-button type="primary" size="small" :disabled="input === ''"
-                @click="search">搜索</el-button>
-        </el-col>
-        <el-col :span="6" v-if="!(cookie.length !== 0)" style="display: flex;justify-content: center;">
-            <RouterLink to="/login">
-                <el-link>登录</el-link>
-            </RouterLink>
-            |
-            <RouterLink to="/register">
-                <el-link>注册</el-link>
-            </RouterLink>
-        </el-col>
-        <el-col :span="6" v-if="cookie.length !== 0">
-            <RouterLink :to="'/user/' + user.uid">
-                <el-link>{{ user.uname }}</el-link>
-            </RouterLink>
-            |
-            <el-button link type="primary" @click="loginOut" size="small">退出登陆</el-button>
-        </el-col>
-    </el-row>
+  <div class="nav-bar">
+    <div class="nav-brand" @click="router.push('/')">
+      <el-icon :size="22"><Reading /></el-icon>
+      <span class="brand-text">共享小说</span>
+    </div>
+    <div class="nav-links">
+      <RouterLink to="/" class="nav-link">首页</RouterLink>
+      <RouterLink to="/classify/page/1" class="nav-link">分类</RouterLink>
+      <RouterLink to="/recommend" class="nav-link">推荐</RouterLink>
+    </div>
+    <div class="nav-search">
+      <el-input
+        v-model="searchInput"
+        placeholder="搜索小说..."
+        size="default"
+        :prefix-icon="Search"
+        clearable
+        @keydown.enter="handleSearch"
+      />
+    </div>
+    <div class="nav-user">
+      <template v-if="loggedIn">
+        <el-dropdown trigger="click">
+          <span class="user-dropdown">
+            <el-avatar :size="32" class="user-avatar">{{ user?.uname?.charAt(0) }}</el-avatar>
+            <span class="user-name">{{ user?.uname }}</span>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="router.push(`/user/${user?.uid}`)">个人中心</el-dropdown-item>
+              <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </template>
+      <template v-else>
+        <el-button type="primary" size="default" @click="router.push('/login')">登录</el-button>
+        <el-button size="default" @click="router.push('/register')">注册</el-button>
+      </template>
+    </div>
+  </div>
 </template>
+
 <script setup lang="ts">
-import type { User } from '@/baseType';
-import router from '@/router';
-import { ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { ref, computed } from 'vue'
+import { Search, Reading } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { isLoggedIn, getStoredUser, clearAuth } from '@/request'
 
-const cookie = document.cookie
-const user: User = JSON.parse(window.localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) || '{}') as User;
+const router = useRouter()
+const searchInput = ref('')
+const loggedIn = computed(() => isLoggedIn())
+const user = computed(() => getStoredUser())
 
-const loginOut = () => {
-    window.localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
-    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
-    router.go(0)
+const handleSearch = () => {
+  if (searchInput.value.trim()) {
+    router.push(`/search/1?name=${encodeURIComponent(searchInput.value.trim())}`)
+    searchInput.value = ''
+  }
 }
 
-const input = ref('')
-
-const search = () => {
-    router.push('/search/1?name=' + input.value) 
-    input.value = ''
+const handleLogout = () => {
+  clearAuth()
+  router.go(0)
 }
 </script>
-<style lang="less" scoped>
-.el-row {
-    font-size: var(--el-font-size-base);
 
-    .el-col {
-        text-align: center;
+<style lang="less" scoped>
+.nav-bar {
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 0 24px;
+  gap: 24px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--el-color-primary);
+  flex-shrink: 0;
+
+  .brand-text {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+}
+
+.nav-links {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+
+  .nav-link {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #555;
+    text-decoration: none;
+    transition: all 0.2s;
+
+    &:hover,
+    &.router-link-active {
+      color: var(--el-color-primary);
+      background: rgba(64, 158, 255, 0.08);
     }
+  }
+}
+
+.nav-search {
+  flex: 1;
+  max-width: 360px;
+}
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+
+  .user-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+
+    .user-avatar {
+      background: var(--el-color-primary);
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .user-name {
+      font-size: 14px;
+      color: #333;
+    }
+  }
 }
 </style>

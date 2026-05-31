@@ -1,16 +1,10 @@
-<!-- 这是小说界面 -->
 <template>
-    <el-row>
-        <el-col>
-            <Novel :nid="Number(id)"></Novel>
-        </el-col>
-        <el-col>
-            <Comments :id="Number(id)"></Comments>
-        </el-col>
-    </el-row>
+  <div class="novel-page">
+    <Novel :nid="Number(id)" />
+    <Comments :id="Number(id)" />
+  </div>
 </template>
+
 <script setup lang="ts">
-defineProps<{
-    id: string
-}>()
+defineProps<{ id: string }>()
 </script>

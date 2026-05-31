@@ -1,48 +1,68 @@
-<!-- 顶栏 -->
- <template>
-    <el-row>
-        <el-col :span="8">
-            小说管理网站
-        </el-col>
-        <el-col :span="8">
-            <el-link :href="href">去看看小说休息一下吧</el-link>
-        </el-col>
+<template>
+  <div class="admin-header-bar">
+    <div class="header-brand">
+      <el-icon :size="20"><Setting /></el-icon>
+      <span>小说管理后台</span>
+    </div>
+    <div class="header-right">
+      <el-link :href="novelWebUrl" target="_blank" :underline="false" class="visit-link">
+        前往前台网站
+      </el-link>
+      <template v-if="admin">
+        <el-divider direction="vertical" />
+        <span class="admin-name">管理员: {{ admin.aname }}</span>
+        <el-button type="danger" size="small" text @click="handleLogout">退出登录</el-button>
+      </template>
+    </div>
+  </div>
+</template>
 
-        <el-col :span="4" v-if="adminJsonStr!==null">
-            欢迎管理员{{ admin?.aname }}
-        </el-col>
-        <el-col :span="4" v-if="adminJsonStr!==null" style="cursor: pointer;" @click="loginOut">退出登陆</el-col>
-        <el-col :span="8" style="cursor: pointer;" @click="goToLogin" v-if="adminJsonStr===null">
-            登陆
-        </el-col>
-    </el-row>
- </template>
- <script setup lang="ts">
-import type { Admin } from '@/baseType';
-import { ref } from 'vue';
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { Setting } from '@element-plus/icons-vue'
+import { getStoredAdmin, clearAdminAuth } from '@/request'
 
- const href = import.meta.env.VITE_NOVEL_WEB_URL
- const adminJsonStr = ref(localStorage.getItem('admin'))
- const admin = ref<Admin>()
- if(adminJsonStr.value){
-     admin.value = JSON.parse(adminJsonStr.value)
- }
+const router = useRouter()
+const novelWebUrl = import.meta.env.VITE_NOVEL_WEB_URL
+const admin = computed(() => getStoredAdmin())
 
- function loginOut(){
-     localStorage.removeItem('admin')
-     adminJsonStr.value = null
-     admin.value = undefined
- }
- function goToLogin(){
-     window.location.href = '#/login'
- }
-</script>
-<style scoped>
-.el-row{
-    height: 100%;
+const handleLogout = () => {
+  clearAdminAuth()
+  router.push('/login')
 }
-.el-col{
-    text-align: center;
-    line-height: 55px;
+</script>
+
+<style lang="less" scoped>
+.admin-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 20px;
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--el-color-primary);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+
+    .visit-link {
+      font-size: 13px;
+    }
+
+    .admin-name {
+      color: #666;
+    }
+  }
 }
 </style>

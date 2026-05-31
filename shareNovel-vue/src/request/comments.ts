@@ -1,35 +1,18 @@
-import type { Comments } from "@/baseType"
-import request from "."
+import type { Comments } from '@/baseType'
+import request from '.'
 
-// 获取评论
-export const getComments = (id: number) => {
-    return request.get("showComments",{
-        params:{
-            nid:id
-        }
-    })
+export const getComments = (nid: number) => {
+  return request.get('showComments', { params: { nid } })
 }
 
-// 添加评论
-export const addComment = (comments:Comments) => {
-    return request.post("addCom",comments)
+export const addComment = (comments: Comments) => {
+  return request.post('addCom', comments)
 }
 
-//举报评论
-export const reportComments = (comments:Comments)=>{
-    return request.post('reportComments',comments)
+export const getUserComments = (uid: number) => {
+  return request.get('showUserComments', { params: { uid } })
 }
 
-//获取用户评论
-export const getUserComments = (id:number)=>{
-    return request.get('showUserComments',{
-        params:{
-            uid:id
-        }
-    })
-}
-
-//删除评论
-export const delComments = (comments:Comments)=>{
-    return request.post('delCom',comments)
+export const delComments = (id: number) => {
+  return request.post('delCom', { id })
 }

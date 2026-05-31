@@ -1,79 +1,116 @@
-<!-- 用户信息 -->
 <template>
-    <el-descriptions border>
-        <el-descriptions-item label="用户名">{{ user.uname }}</el-descriptions-item>
-        <el-descriptions-item label="用户id">{{ user.uid }}</el-descriptions-item>
-        <el-descriptions-item label="注册时间">{{ user.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="状态">
-            <el-text :type="state === '正常' ? 'success' : 'danger'">{{ state }}</el-text>
-        </el-descriptions-item>
+  <div class="user-info-card">
+    <el-descriptions :column="2" border>
+      <el-descriptions-item label="用户名">{{ user.uname }}</el-descriptions-item>
+      <el-descriptions-item label="用户ID">{{ user.uid }}</el-descriptions-item>
+      <el-descriptions-item label="注册时间">{{ user.createTime }}</el-descriptions-item>
+      <el-descriptions-item label="状态">
+        <el-tag :type="user.banned === 0 ? 'success' : 'danger'" size="small">
+          {{ user.banned === 0 ? '正常' : '封禁' }}
+        </el-tag>
+      </el-descriptions-item>
     </el-descriptions>
-    <el-button type="danger" @click="restePassword" v-if="flag">重设密码</el-button>
+    <div class="user-actions" v-if="isSelf">
+      <el-button type="warning" @click="handleChangePwd">修改密码</el-button>
+      <el-button type="danger" @click="handleDeleteAccount">注销账号</el-button>
+    </div>
+  </div>
 </template>
+
 <script setup lang="ts">
-import type { Result, User } from '@/baseType';
-import { changePwd, getUserInfo } from '@/request/user';
-import router from '@/router';
-import { ref, type Ref } from 'vue';
+import type { Result, User } from '@/baseType'
+import { changePwd, deleteUser, getUserInfo } from '@/request/user'
+import { clearAuth, getStoredUser } from '@/request'
+import router from '@/router'
+import { ref, onMounted } from 'vue'
 
-const props = defineProps<{
-    uid: number
-}>()
+const props = defineProps<{ uid: number }>()
 
-const user: Ref<User> = ref({
-    uname: ''
+const user = ref<User>({ uname: '' })
+const isSelf = ref(false)
+
+onMounted(async () => {
+  const stored = getStoredUser()
+  isSelf.value = stored?.uid === props.uid
+
+  const res = await getUserInfo(props.uid)
+  const result: Result = res.data
+  if (result.state === '1') {
+    user.value = result.data
+  }
 })
 
-const state = ref("正常")
-
-const flag = (props.uid === JSON.parse(localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) as string).uid)
-
-const restePassword = () => {
-    ElMessageBox.prompt('请输入旧密码', '重设密码', {
-        cancelButtonText: '取消',
-        confirmButtonText: '确定',
-        inputType: 'password',
-    }
-    ).then(oldPwd => {
-        ElMessageBox.prompt('请输入新密码', '重设密码', {
-            cancelButtonText: '取消',
-            confirmButtonText: '确定',
-            inputType: 'password',
-            inputPattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/,
-            inputErrorMessage: '密码必须包含字母和数字，长度在8到12之间'
-        }).then(newPwd => {
-            if(import.meta.env.DEV)
-            console.log(oldPwd, newPwd)
-            changePwd(oldPwd.value, newPwd.value).then(res => {
-                const result: Result = res.data
-                if (result.state === '1') {
-                    ElMessage.success({
-                        message: result.message + '，请重新登录',
-                        duration: 2000,
-                        onClose: () => {
-                            document.cookie += ';max-age=0'
-                            localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
-                            router.push('/login')
-                        }
-                    })
-                }
-                else {
-                    ElMessage.error(result.message)
-                }
-            })
+const handleChangePwd = () => {
+  ElMessageBox.prompt('请输入旧密码', '修改密码', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputType: 'password',
+  }).then(({ value: oldPwd }) => {
+    ElMessageBox.prompt('请输入新密码', '修改密码', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputType: 'password',
+      inputPattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/,
+      inputErrorMessage: '密码必须包含字母和数字，长度8-12位',
+    }).then(async ({ value: newPwd }) => {
+      const res = await changePwd(oldPwd, newPwd)
+      const result: Result = res.data
+      if (result.state === '1') {
+        ElMessage.success({
+          message: result.message + '，请重新登录',
+          duration: 2000,
+          onClose: () => {
+            clearAuth()
+            router.push('/login')
+          },
         })
+      } else {
+        ElMessage.error(result.message)
+      }
     })
+  }).catch(() => {})
 }
 
-getUserInfo(props.uid).then(res => {
+const handleDeleteAccount = async () => {
+  try {
+    await ElMessageBox.confirm('确定要注销账号吗？此操作不可恢复！', '警告', {
+      confirmButtonText: '确定注销',
+      cancelButtonText: '取消',
+      type: 'error',
+    })
+    const { value: pwd } = await ElMessageBox.prompt('请输入密码确认', '注销确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputType: 'password',
+      inputPattern: /\S/,
+      inputErrorMessage: '密码不能为空',
+    })
+    const res = await deleteUser(pwd)
     const result: Result = res.data
-    user.value = result.data
-    if (user.value.banned === 0) {
-        state.value = "正常"
+    if (result.state === '1') {
+      ElMessage.success({
+        message: '账号已注销',
+        duration: 1500,
+        onClose: () => {
+          clearAuth()
+          router.push('/')
+        },
+      })
+    } else {
+      ElMessage.error(result.message)
     }
-    else {
-        state.value = "封禁"
-    }
-})
-
+  } catch {
+    // cancelled
+  }
+}
 </script>
+
+<style lang="less" scoped>
+.user-info-card {
+  .user-actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+  }
+}
+</style>

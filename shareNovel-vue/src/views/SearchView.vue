@@ -1,7 +1,7 @@
-<!-- 搜索结果界面 -->
 <template>
-    <ShowNovels :name="name"></ShowNovels>
+  <ShowNovels :name="name" />
 </template>
+
 <script setup lang="ts">
-defineProps<{ name: string }>();
+defineProps<{ name: string }>()
 </script>

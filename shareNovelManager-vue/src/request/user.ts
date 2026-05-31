@@ -1,45 +1,26 @@
-import type { Admin, User } from "@/baseType";
-import request from ".";
+import type { User } from '@/baseType'
+import request from '.'
 
-//获取违规用户信息
-export const getBanUsers = request.get('getBanUsers')
-
-//获取已经封禁用户信息
-export const getBannedUsers = request.get('getBannedUsers')
-
-//封禁用户
-export const banUser = (admin:Admin,user:User)=>{
-    user.banned=1
-    return request.post('auditUser',{
-        admin,
-        user
-    })
+export const getBanUsers = () => {
+  return request.get('getBanUsers')
 }
 
-//解封用户
-export const unbanUser = (admin:Admin,user:User)=>{
-    user.banned=0
-    return request.post('auditUser',{
-        admin,
-        user
-    })
+export const getBannedUsers = () => {
+  return request.get('getBannedUsers')
 }
 
-//获取所有用户信息
-export const getAllUsers = request.get('getAllUsers')
-
-//删除用户
-export const deleteUser = (admin:Admin,user:User)=>{
-    return request.post('deleteUserByAdmin',{
-        admin,
-        user
-    })
+export const auditUser = (user: User) => {
+  return request.post('auditUser', { user })
 }
 
-//修改用户密码
-export const changeUserPassword = (admin:Admin,user:User)=>{
-    return request.post('resetPwdByAdmin',{
-        admin,
-        user
-    })
+export const getAllUsers = () => {
+  return request.get('getAllUsers')
+}
+
+export const deleteUserByAdmin = (user: User) => {
+  return request.post('deleteUserByAdmin', { user })
+}
+
+export const resetPwdByAdmin = (user: User) => {
+  return request.post('resetPwdByAdmin', { user })
 }

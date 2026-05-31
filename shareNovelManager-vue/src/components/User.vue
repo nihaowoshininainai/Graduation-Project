@@ -1,79 +1,106 @@
-<!-- 这是用户管理 -->
 <template>
-  搜索框：
-  <el-input style="width: 200px;" placeholder="输入用户名搜索" v-model="search"></el-input>
-  <el-table :data="filterUsers">
-    <el-table-column prop="uname" label="用户名" />
-    <el-table-column prop="createTime" label="创建时间" />
-    <el-table-column prop="uid" label="用户id" />
-    <el-table-column prop="banned" label="状态">
-      <template #default="{ row }">
-        {{ row.banned === 0 ? '正常' : '封禁' }}
-      </template>
-    </el-table-column>
-    <el-table-column>
-      <template #default="scope">
-        <el-button type="danger" @click="delUser(scope.row.uid)">删除</el-button>
-        <el-button type="primary" @click="changePwd(scope.row)">修改密码</el-button>
-      </template>
-    </el-table-column>
-  </el-table>
+  <div class="user-manage">
+    <div class="page-header">
+      <h3>用户管理</h3>
+      <el-input v-model="search" placeholder="搜索用户名" style="width: 240px;" clearable :prefix-icon="Search" />
+    </div>
+    <el-table :data="filteredUsers" stripe>
+      <el-table-column prop="uname" label="用户名" />
+      <el-table-column prop="uid" label="用户ID" width="100" />
+      <el-table-column prop="createTime" label="创建时间" width="180" />
+      <el-table-column label="状态" width="100">
+        <template #default="{ row }">
+          <el-tag :type="row.banned === 0 ? 'success' : 'danger'" size="small">
+            {{ row.banned === 0 ? '正常' : '封禁' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="240">
+        <template #default="scope">
+          <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button type="warning" size="small" @click="handleChangePwd(scope.row)">重置密码</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
 </template>
+
 <script setup lang="ts">
-import type { Admin, Result, User } from '@/baseType';
-import { deleteUser, getAllUsers, changeUserPassword } from '@/request/user';
-import { computed, ref } from 'vue';
+import type { Result, User } from '@/baseType'
+import { getAllUsers, deleteUserByAdmin, resetPwdByAdmin } from '@/request/user'
+import { ref, computed, onMounted } from 'vue'
+import { Search } from '@element-plus/icons-vue'
 
 const search = ref('')
-
-const filterUsers = computed(() => {
-  return users.value.filter((user) => {
-    if(search.value==='') return true
-    return user.uname.includes(search.value)
-  })
-})
-
 const users = ref<User[]>([])
-getAllUsers.then(res => {
-  const result: Result = res.data
-  users.value = result.data
+
+const filteredUsers = computed(() => {
+  if (!search.value) return users.value
+  return users.value.filter(u => u.uname.includes(search.value))
 })
-const delUser = (uid: number) => {
-  ElMessageBox.prompt('请输入密码', '删除用户', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    inputType: 'password',
-  }).then(({ value }) => {
-    const admin = JSON.parse(localStorage.getItem('admin') as string) as Admin
-    admin.pwd = value
-    const user: User = {
-      uid: uid,
-      uname: ''
-    }
-    deleteUser(admin, user).then(res => {
-      ElMessage.warning(res.data)
-    }
-    )
-  })
+
+const fetchUsers = async () => {
+  const res = await getAllUsers()
+  const result: Result = res.data
+  if (result.state === '1') {
+    users.value = result.data
+  }
 }
-const changePwd = (user: User) => {
-  ElMessageBox.prompt('请输入管理员密码', '验证管理员身份', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    inputType: 'password',
-  }).then(({ value }) => {
-    const admin = JSON.parse(localStorage.getItem('admin') as string) as Admin
-    admin.pwd = value
-    ElMessageBox.prompt('请输入新密码', '修改密码', {
+
+const handleDelete = async (user: User) => {
+  try {
+    await ElMessageBox.confirm(`确定删除用户 "${user.uname}" 吗？`, '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
-      inputType: 'password',
-    }).then(({ value }) => {
-      user.pwd = value
-      changeUserPassword(admin, user).then(res => {
-        ElMessage.warning(res.data)
-      })
+      type: 'warning',
     })
-  })
+    const res = await deleteUserByAdmin({ uid: user.uid, uname: '' })
+    const result: Result = res.data
+    if (result.state === '1') {
+      ElMessage.success(result.message)
+      fetchUsers()
+    } else {
+      ElMessage.error(result.message)
+    }
+  } catch {
+    // cancelled
+  }
 }
+
+const handleChangePwd = (user: User) => {
+  ElMessageBox.prompt('请输入新密码', `重置用户 "${user.uname}" 的密码`, {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputPattern: /\S/,
+    inputErrorMessage: '密码不能为空',
+  }).then(async ({ value }) => {
+    const res = await resetPwdByAdmin({ uid: user.uid, uname: '', pwd: value })
+    const result: Result = res.data
+    if (result.state === '1') {
+      ElMessage.success(result.message)
+    } else {
+      ElMessage.error(result.message)
+    }
+  }).catch(() => {})
+}
+
+onMounted(() => {
+  fetchUsers()
+})
 </script>
+
+<style lang="less" scoped>
+.user-manage {
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+  }
+}
+</style>

@@ -1,148 +1,221 @@
-<!-- 小说内容 -->
 <template>
-    <el-row style="width: 100%;">
-        <el-col>
-            <h2>{{ novel?.title }}</h2>
-        </el-col>
-        <el-col class="novelMessage">
-            <el-text style="cursor: pointer;" @click="router.push(`/user/${novel?.uid}`)">作者:{{ uname }}</el-text>
-            <el-text>创作时间:{{ novel?.createTime }}</el-text>
-            <el-text style="cursor: pointer;">
-                <svg @click="addLike(novel as Novel)" v-show="!isLike" xmlns="http://www.w3.org/2000/svg" width="21"
-                    height="21" viewBox="0 0 26 26">
-                    <path fill="#999999"
-                        d="M17.869 3.889c-2.096 0-3.887 1.494-4.871 2.524c-.984-1.03-2.771-2.524-4.866-2.524C4.521 3.889 2 6.406 2 10.009c0 3.97 3.131 6.536 6.16 9.018c1.43 1.173 2.91 2.385 4.045 3.729c.191.225.471.355.765.355h.058c.295 0 .574-.131.764-.355c1.137-1.344 2.616-2.557 4.047-3.729C20.867 16.546 24 13.98 24 10.009c0-3.603-2.521-6.12-6.131-6.12" />
-                </svg>
-                <svg @click="disLike(novel as Novel)" v-show="isLike" xmlns="http://www.w3.org/2000/svg" width="21"
-                    height="21" viewBox="0 0 26 26">
-                    <path fill="#e11d48"
-                        d="M17.869 3.889c-2.096 0-3.887 1.494-4.871 2.524c-.984-1.03-2.771-2.524-4.866-2.524C4.521 3.889 2 6.406 2 10.009c0 3.97 3.131 6.536 6.16 9.018c1.43 1.173 2.91 2.385 4.045 3.729c.191.225.471.355.765.355h.058c.295 0 .574-.131.764-.355c1.137-1.344 2.616-2.557 4.047-3.729C20.867 16.546 24 13.98 24 10.009c0-3.603-2.521-6.12-6.131-6.12" />
-                </svg>
-            </el-text>
-            <el-text>浏览量:{{ novel?.views }}</el-text>
-            <el-text type="danger" style="cursor: pointer;" @click="reportNovel(novel as Novel)">举报</el-text>
-        </el-col>
-        <el-col v-html="novel?.content" style="text-align: left;"></el-col>
-    </el-row>
+  <div class="novel-detail" v-if="novel">
+    <div class="novel-header">
+      <h1 class="novel-title">{{ novel.title }}</h1>
+      <div class="novel-meta">
+        <span class="meta-item" @click="router.push(`/user/${novel.uid}`)">
+          <el-icon><UserIcon /></el-icon>
+          {{ uname }}
+        </span>
+        <span class="meta-item">
+          <el-icon><Clock /></el-icon>
+          {{ novel.createTime }}
+        </span>
+        <span class="meta-item">
+          <el-icon><View /></el-icon>
+          {{ novel.views || 0 }} 次浏览
+        </span>
+        <span class="meta-action" @click="handleLike">
+          <el-icon :size="18" :color="isCollected ? '#e11d48' : '#999'">
+            <StarFilled v-if="isCollected" />
+            <Star v-else />
+          </el-icon>
+          {{ isCollected ? '已收藏' : '收藏' }}
+        </span>
+        <span class="meta-action danger" @click="handleReport">
+          <el-icon><Warning /></el-icon>
+          举报
+        </span>
+      </div>
+    </div>
+    <el-divider />
+    <div class="novel-content" v-html="novel.content"></div>
+  </div>
+  <el-skeleton v-else :rows="10" animated />
 </template>
+
 <script setup lang="ts">
-import type { Novel, Result, User } from '@/baseType';
-import { delLike, ifLike, like } from '@/request/collection';
-import { addView, getView } from '@/request/hotdata';
-import { getNovelDetail, reportNovel } from '@/request/novel';
-import { getUname } from '@/request/user';
-import router from '@/router';
-import { ref } from 'vue';
+import type { Novel, Result } from '@/baseType'
+import { ifLike, like, delLike } from '@/request/collection'
+import { addView, getView } from '@/request/hotdata'
+import { getNovelDetail, reportNovel } from '@/request/novel'
+import { getUname } from '@/request/user'
+import { isLoggedIn, getStoredUser } from '@/request'
+import router from '@/router'
+import { ref, onMounted } from 'vue'
+import { User as UserIcon, Clock, View, Star, StarFilled, Warning } from '@element-plus/icons-vue'
 
-const props = defineProps<{
-    nid: number
-}>()
-
-let novelsId: number[] = []
-const isExist = localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL_VIEW)
-if (isExist) {
-    novelsId = JSON.parse(isExist) as number[]
-    if (!novelsId.includes(props.nid)) {
-        addView(props.nid)
-        novelsId.push(props.nid)
-        localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL_VIEW, JSON.stringify(novelsId))
-    }
-}
-else {
-    addView(props.nid)
-    novelsId.push(props.nid)
-    localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL_VIEW, JSON.stringify(novelsId))
-}
+const props = defineProps<{ nid: number }>()
 
 const novel = ref<Novel>()
+const uname = ref('')
+const isCollected = ref(false)
 
-const uname = ref<string>('')
+const viewedNovels: number[] = (() => {
+  const raw = localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL_VIEW)
+  return raw ? JSON.parse(raw) : []
+})()
 
-const isLike = ref<boolean>(false)
+onMounted(async () => {
+  if (!viewedNovels.includes(props.nid)) {
+    await addView(props.nid)
+    viewedNovels.push(props.nid)
+    localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL_VIEW, JSON.stringify(viewedNovels))
+  }
 
-getNovelDetail(props.nid).then(res => {
+  const res = await getNovelDetail(props.nid)
+  const result: Result = res.data
+  if (result.state === '1') {
+    novel.value = result.data
+    if (novel.value?.state === -1 || novel.value?.state === 3) {
+      ElMessage.error({ message: '该小说已下架', duration: 2000, onClose: () => router.push('/') })
+      return
+    }
+    getUname(novel.value.uid as number).then((res) => {
+      const r: Result = res.data
+      if (r.state === '1') uname.value = r.data
+    })
+    getView(props.nid).then((res) => {
+      novel.value!.views = res.data
+    })
+  } else {
+    ElMessage.error({ message: '获取小说失败', duration: 2000, onClose: () => router.push('/') })
+  }
+
+  if (isLoggedIn()) {
+    const user = getStoredUser()
+    if (user?.uid) {
+      const likeRes = await ifLike(user.uid, props.nid)
+      const likeResult: Result = likeRes.data
+      if (likeResult.state === '1') {
+        isCollected.value = likeResult.data
+      }
+    }
+  }
+})
+
+const handleLike = async () => {
+  if (!isLoggedIn()) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+  try {
+    if (isCollected.value) {
+      const res = await delLike(props.nid)
+      const result: Result = res.data
+      if (result.state === '1') {
+        isCollected.value = false
+        ElMessage.success(result.message)
+      } else {
+        ElMessage.error(result.message)
+      }
+    } else {
+      const res = await like(props.nid)
+      const result: Result = res.data
+      if (result.state === '1') {
+        isCollected.value = true
+        ElMessage.success(result.message)
+      } else {
+        ElMessage.error(result.message)
+      }
+    }
+  } catch {
+    ElMessage.error('操作失败')
+  }
+}
+
+const handleReport = async () => {
+  if (!isLoggedIn()) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+  try {
+    await ElMessageBox.confirm('确定要举报该小说吗？', '举报确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+    const res = await reportNovel(props.nid)
     const result: Result = res.data
     if (result.state === '1') {
-        novel.value = result.data
-        if ((novel.value ? true : false) && (novel.value?.state === -1 || novel.value?.state === 3)) {
-            ElMessage.error({
-                message: '该小说已下架',
-                duration: 2000,
-                onClose: () => router.push('/')
-            })
-        }
-        else {
-            getUname(novel.value?.uid as number).then(res => {
-                const result: Result = res.data
-                if (result.state === '1') {
-                    uname.value = result.data
-                }
-            })
-            getView(props.nid).then(res => {
-                novel.value!.views = res.data
-            }
-            )
-        }
+      ElMessage.success(result.message)
+    } else {
+      ElMessage.error(result.message)
     }
-    else {
-        ElMessage.error({
-            message: '获取小说失败',
-            duration: 2000,
-            onClose: () => router.push('/')
-        })
-    }
-})
-if (localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER)) {
-    const user = JSON.parse(localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) as string) as User
-    ifLike(user.uid as number, props.nid).then(res => {
-        const result: Result = res.data
-        if (result.state === '1') {
-            isLike.value = result.data
-        }
-    })
-}
-function addLike(novel: Novel) {
-    like(novel).then(res => {
-        const result: Result = res.data
-        if (result.state === '1') {
-            isLike.value = true
-            ElMessage.success(result.message)
-        }
-        else {
-            ElMessage.error(result.message)
-        }
-    })
-}
-function disLike(novel: Novel) {
-    delLike(novel).then(res => {
-        const result: Result = res.data
-        if (result.state === '1') {
-            isLike.value = false
-            ElMessage.success(result.message)
-        }
-        else {
-            ElMessage.error({
-                message: result.message,
-                duration: 2000,
-                onClose: () => {
-                    if (result.message === import.meta.env.VITE_MESSAGE_RELOGIN) {
-                        localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
-                        document.cookie += ";max-age=0"
-                        router.push('/login')
-                    }
-                }
-            })
-        }
-    })
+  } catch {
+    // cancelled
+  }
 }
 </script>
+
 <style lang="less" scoped>
-.el-col{
-    margin-bottom: 10px;
-    text-align: center;
-    .novelMessage{
-        display: flex;
-        justify-content: space-around;
+.novel-detail {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.novel-header {
+  .novel-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 16px;
+  }
+
+  .novel-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    color: #888;
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: default;
+
+      &:first-child {
+        cursor: pointer;
+        color: var(--el-color-primary);
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
+
+    .meta-action {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: color 0.2s;
+
+      &:hover {
+        color: var(--el-color-primary);
+      }
+
+      &.danger:hover {
+        color: var(--el-color-danger);
+      }
+    }
+  }
+}
+
+.novel-content {
+  line-height: 1.8;
+  font-size: 16px;
+  color: #333;
+  word-break: break-word;
+
+  :deep(img) {
+    max-width: 100%;
+    border-radius: 8px;
+  }
 }
 </style>

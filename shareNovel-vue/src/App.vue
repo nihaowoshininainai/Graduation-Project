@@ -1,74 +1,78 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router';
-import { ref, onMounted, onUnmounted } from 'vue';
-import Header from '@/components/Header.vue'; // 确保你已经导入 Header 组件
+import { ref, onMounted, onUnmounted } from 'vue'
+import Header from '@/components/Header.vue'
+import { isLoggedIn } from '@/request'
 
-const isScrolled = ref(false);
+const isScrolled = ref(false)
 
-if (localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_USER) === null) {
-  document.cookie += ";max-age=0;path=/"
-}
-
-if (document.cookie === "") {
-  localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
+if (!isLoggedIn()) {
+  document.cookie = 'Token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
 }
 
 const handleScroll = () => {
-  isScrolled.value = window.scrollY > 0;
-};
+  isScrolled.value = window.scrollY > 0
+}
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll);
-});
+  window.addEventListener('scroll', handleScroll)
+})
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
-});
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <template>
-  <div class="common-layout">
-    <el-container>
-      <el-header :class="{ 'scrolled': isScrolled }">
-        <Header></Header>
-      </el-header>
-      <el-main>
-        <RouterView></RouterView>
-      </el-main>
-      <el-footer>
-        <h1>本项目用于学习使用，若上传小说有侵权，请联系qq:2763588199</h1>
-      </el-footer>
-    </el-container>
+  <div class="app-layout">
+    <header :class="['app-header', { scrolled: isScrolled }]">
+      <Header />
+    </header>
+    <main class="app-main">
+      <RouterView />
+    </main>
+    <footer class="app-footer">
+      <p>共享小说平台 - 仅供学习使用</p>
+    </footer>
   </div>
 </template>
+
 <style lang="less" scoped>
-.common-layout {
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-  .el-header {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    transition: background-color 0.3s;
-    background-color: transparent;
-    z-index: 1000;
-  }
+.app-header {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  background: transparent;
+  transition: all 0.3s ease;
+  box-shadow: none;
 
-  .el-header.scrolled {
-    background-color: white;
+  &.scrolled {
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   }
+}
 
-  .el-main {
-    width: 70%;
-    margin: 20px auto;
-    padding-top: 60px; // 确保内容不被固定的 header 遮挡
-  }
+.app-main {
+  flex: 1;
+  width: 75%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 70px;
+  padding-bottom: 40px;
+}
 
-  .el-footer{
-    text-align: center;
-  }
+.app-footer {
+  text-align: center;
+  padding: 20px 0;
+  color: #999;
+  font-size: 13px;
+  border-top: 1px solid #f0f0f0;
 }
 </style>
