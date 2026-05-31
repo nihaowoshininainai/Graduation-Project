@@ -78,12 +78,6 @@ CREATE TABLE IF NOT EXISTS `Label` (
     UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='标签表';
 
-INSERT INTO `Label` (`id`, `name`) VALUES
-(1, '言情小说'), (2, '科幻小说'), (3, '现实主义小说'), (4, '浪漫主义小说'),
-(5, '武侠小说'), (6, '惊悚小说'), (7, '悬疑小说'), (8, '奇幻小说'),
-(9, '历史小说'), (10, '儿童文学'), (11, '其他')
-ON DUPLICATE KEY UPDATE `name`=`name`;
-
 CREATE TABLE IF NOT EXISTS `NovelLabel` (
     `id` INT NOT NULL AUTO_INCREMENT COMMENT 'id',
     `nid` INT NOT NULL COMMENT '小说id',

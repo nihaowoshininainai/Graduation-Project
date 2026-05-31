@@ -43,26 +43,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { Search, Reading } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
-import { isLoggedIn, getStoredUser, clearAuth } from '@/request'
+import { getStoredUser, isLoggedIn, clearAuth } from '@/request'
 
 const router = useRouter()
 const searchInput = ref('')
-const loggedIn = computed(() => isLoggedIn())
-const user = computed(() => getStoredUser())
+const loggedIn = ref(isLoggedIn())
+const user = ref(getStoredUser())
 
-const handleSearch = () => {
+watch(() => router.currentRoute.value, () => {
+  loggedIn.value = isLoggedIn()
+  user.value = getStoredUser()
+})
+
+function handleSearch() {
   if (searchInput.value.trim()) {
     router.push(`/search/1?name=${encodeURIComponent(searchInput.value.trim())}`)
     searchInput.value = ''
   }
 }
 
-const handleLogout = () => {
+async function handleLogout() {
   clearAuth()
-  router.go(0)
+  loggedIn.value = false
+  user.value = null
+  await router.push('/')
 }
 </script>
 

@@ -35,13 +35,23 @@ request.interceptors.response.use(
   },
 )
 
+const LOGGED_IN_KEY = '__logged_in__'
+
+export function setAuth(token: string, user: any) {
+  document.cookie = `Token=${token};path=/;SameSite=Lax`
+  localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_USER, JSON.stringify(user))
+  localStorage.setItem(LOGGED_IN_KEY, '1')
+}
+
 export function clearAuth() {
-  document.cookie = 'Token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
+  document.cookie = 'Token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;SameSite=Lax'
+  document.cookie = 'Token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/api;SameSite=Lax'
   localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_USER)
+  localStorage.removeItem(LOGGED_IN_KEY)
 }
 
 export function isLoggedIn(): boolean {
-  return document.cookie.includes('Token=')
+  return localStorage.getItem(LOGGED_IN_KEY) === '1'
 }
 
 export function getStoredUser() {

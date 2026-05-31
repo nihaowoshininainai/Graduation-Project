@@ -27,8 +27,10 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { login, getUid } from '@/request/user'
+import { setAuth } from '@/request'
 import router from '@/router'
 import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import type { Result, User } from '@/baseType'
 import { User as UserIcon, Lock } from '@element-plus/icons-vue'
 
@@ -56,12 +58,11 @@ const handleLogin = () => {
       const res = await login(form.uname, form.pwd)
       const result: Result = res.data
       if (result.state === '1') {
-        document.cookie = `Token=${result.data};path=/`
         const uidRes = await getUid(form.uname)
         const uidResult: Result = uidRes.data
         if (uidResult.state === '1') {
           const user: User = { uname: form.uname, uid: uidResult.data }
-          localStorage.setItem(import.meta.env.VITE_LOCALSTORAGE_USER, JSON.stringify(user))
+          setAuth(result.data, user)
           ElMessage.success({ message: result.message, duration: 1000 })
           router.push('/')
         }
