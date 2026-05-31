@@ -15,12 +15,12 @@ request.interceptors.response.use(
 )
 
 export function clearAdminAuth() {
-  document.cookie = 'Token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
+  document.cookie = 'AdminToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;'
   localStorage.removeItem('admin')
 }
 
 export function isAdminLoggedIn(): boolean {
-  return localStorage.getItem('admin') !== null && document.cookie.includes('Token=')
+  return localStorage.getItem('admin') !== null && document.cookie.includes('AdminToken=')
 }
 
 export function getStoredAdmin() {

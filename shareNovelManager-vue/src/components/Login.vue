@@ -55,7 +55,7 @@ const handleLogin = () => {
       const res = await adminLogin(form)
       const result: Result = res.data
       if (result.state === '1') {
-        document.cookie = `Token=${result.data};path=/`
+        document.cookie = `AdminToken=${result.data};path=/`
         const admin: Admin = { aname: form.aname }
         localStorage.setItem('admin', JSON.stringify(admin))
         ElMessage.success({ message: result.message, duration: 1000 })

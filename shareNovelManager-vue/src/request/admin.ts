@@ -2,7 +2,7 @@ import type { Admin } from '@/baseType'
 import request from '.'
 
 export const adminLogin = (admin: Admin) => {
-  return request.post('alogin', admin)
+  return request.post('adminLogin', admin)
 }
 
 export const getAdminInfo = (aname: string) => {
