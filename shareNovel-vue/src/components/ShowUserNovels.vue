@@ -11,7 +11,7 @@
       </el-table-column>
       <el-table-column v-if="isSelf" label="操作" width="180">
         <template #default="scope">
-          <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button type="danger" size="small" @click="handleDelete(scope.row as Novel)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

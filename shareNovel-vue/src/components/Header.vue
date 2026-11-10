@@ -1,8 +1,8 @@
 <template>
   <div class="nav-bar">
     <div class="nav-brand" @click="router.push('/')">
-      <el-icon :size="22"><Reading /></el-icon>
-      <span class="brand-text">共享小说</span>
+      <el-icon :size="24"><Reading /></el-icon>
+      <span class="brand-text">酸橙信笺</span>
     </div>
     <div class="nav-links">
       <RouterLink to="/" class="nav-link">首页</RouterLink>
@@ -87,33 +87,40 @@ async function handleLogout() {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  color: var(--el-color-primary);
   flex-shrink: 0;
 
+  .el-icon {
+    color: var(--ark-terracotta);
+    filter: drop-shadow(0 1px 3px rgba(196, 80, 40, 0.25));
+  }
+
   .brand-text {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 1px;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--ark-terracotta);
+    letter-spacing: 2px;
+    text-shadow: 0 1px 4px rgba(196, 80, 40, 0.12);
   }
 }
 
 .nav-links {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 
   .nav-link {
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 14px;
-    color: #555;
+    font-weight: 600;
+    color: var(--ark-brown);
     text-decoration: none;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 
     &:hover,
     &.router-link-active {
-      color: var(--el-color-primary);
-      background: rgba(64, 158, 255, 0.08);
+      color: var(--ark-terracotta);
+      background: rgba(196, 80, 40, 0.08);
     }
   }
 }
@@ -121,6 +128,18 @@ async function handleLogout() {
 .nav-search {
   flex: 1;
   max-width: 360px;
+
+  :deep(.el-input__wrapper) {
+    border-radius: 999px;
+    background: var(--ark-white);
+    box-shadow: inset 0 0 0 1px rgba(196, 80, 40, 0.15);
+    transition: box-shadow 0.2s ease;
+
+    &:hover,
+    &.is-focus {
+      box-shadow: inset 0 0 0 1.5px rgba(196, 80, 40, 0.3);
+    }
+  }
 }
 
 .nav-user {
@@ -136,14 +155,15 @@ async function handleLogout() {
     cursor: pointer;
 
     .user-avatar {
-      background: var(--el-color-primary);
+      background: linear-gradient(135deg, var(--ark-terracotta), var(--ark-coral));
       color: #fff;
       font-size: 14px;
     }
 
     .user-name {
       font-size: 14px;
-      color: #333;
+      color: var(--ark-brown);
+      font-weight: 600;
     }
   }
 }

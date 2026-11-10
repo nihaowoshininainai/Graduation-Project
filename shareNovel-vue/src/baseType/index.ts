@@ -38,7 +38,8 @@ export type Comments = {
     nid:number,
     uid:number,
     content:string,
-    state?:number
+    state?:number,
+    createTime?:string
 }
 
 export type Collection = {

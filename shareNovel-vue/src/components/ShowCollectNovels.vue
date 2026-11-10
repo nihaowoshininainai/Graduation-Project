@@ -11,7 +11,7 @@
       </el-table-column>
       <el-table-column v-if="isSelf" label="操作" width="120">
         <template #default="scope">
-          <el-button type="warning" size="small" @click="handleUncollect(scope.row)">取消收藏</el-button>
+          <el-button type="warning" size="small" @click="handleUncollect(scope.row as Novel)">取消收藏</el-button>
         </template>
       </el-table-column>
     </el-table>

@@ -71,10 +71,13 @@ onMounted(async () => {
       ElMessage.error({ message: '该小说已下架', duration: 2000, onClose: () => router.push('/') })
       return
     }
-    getUname(novel.value.uid as number).then((res) => {
-      const r: Result = res.data
-      if (r.state === '1') uname.value = r.data
-    })
+    const uid = novel.value?.uid
+    if (uid) {
+      getUname(uid).then((res) => {
+        const r: Result = res.data
+        if (r.state === '1') uname.value = r.data
+      })
+    }
     getView(props.nid).then((res) => {
       novel.value!.views = res.data
     })
@@ -154,15 +157,22 @@ const handleReport = async () => {
 .novel-detail {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px 0;
+  padding: 28px;
+  background: var(--ark-white);
+  border-radius: 16px;
+  border: 1px solid rgba(196, 80, 40, 0.08);
+  box-shadow:
+    0 8px 28px rgba(196, 80, 40, 0.06),
+    0 2px 8px rgba(42, 36, 32, 0.04);
 }
 
 .novel-header {
   .novel-title {
     font-size: 28px;
-    font-weight: 700;
-    color: #1a1a1a;
+    font-weight: 800;
+    color: var(--ark-ink);
     margin: 0 0 16px;
+    line-height: 1.3;
   }
 
   .novel-meta {
@@ -171,7 +181,7 @@ const handleReport = async () => {
     gap: 20px;
     flex-wrap: wrap;
     font-size: 14px;
-    color: #888;
+    color: var(--ark-muted);
 
     .meta-item {
       display: flex;
@@ -181,7 +191,8 @@ const handleReport = async () => {
 
       &:first-child {
         cursor: pointer;
-        color: var(--el-color-primary);
+        color: var(--ark-terracotta);
+        font-weight: 600;
 
         &:hover {
           text-decoration: underline;
@@ -197,7 +208,7 @@ const handleReport = async () => {
       transition: color 0.2s;
 
       &:hover {
-        color: var(--el-color-primary);
+        color: var(--ark-terracotta);
       }
 
       &.danger:hover {
@@ -208,14 +219,14 @@ const handleReport = async () => {
 }
 
 .novel-content {
-  line-height: 1.8;
+  line-height: 1.9;
   font-size: 16px;
-  color: #333;
+  color: var(--ark-ink);
   word-break: break-word;
 
   :deep(img) {
     max-width: 100%;
-    border-radius: 8px;
+    border-radius: 10px;
   }
 }
 </style>

@@ -173,15 +173,21 @@ onMounted(() => {
 .comments-section {
   max-width: 800px;
   margin: 30px auto 0;
-  padding-top: 20px;
-  border-top: 1px solid #f0f0f0;
+  padding: 24px;
+  background: var(--ark-white);
+  border-radius: 16px;
+  border: 1px solid rgba(196, 80, 40, 0.08);
+  box-shadow:
+    0 8px 28px rgba(196, 80, 40, 0.06),
+    0 2px 8px rgba(42, 36, 32, 0.04);
 }
 
 .section-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
   margin: 0 0 20px;
-  color: #303133;
+  color: var(--ark-terracotta);
+  letter-spacing: 1px;
 }
 
 .comment-input {
@@ -191,7 +197,7 @@ onMounted(() => {
 .comment-list {
   .comment-item {
     padding: 16px 0;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 1px dashed rgba(196, 80, 40, 0.10);
 
     &:last-child {
       border-bottom: none;
@@ -204,7 +210,7 @@ onMounted(() => {
       margin-bottom: 8px;
 
       .comment-avatar {
-        background: var(--el-color-primary-light-3);
+        background: linear-gradient(135deg, var(--ark-terracotta), var(--ark-coral));
         color: #fff;
         font-size: 12px;
         flex-shrink: 0;
@@ -212,21 +218,21 @@ onMounted(() => {
 
       .comment-author {
         font-size: 14px;
-        font-weight: 500;
-        color: #333;
+        font-weight: 600;
+        color: var(--ark-brown);
       }
 
       .comment-time {
         font-size: 12px;
-        color: #bbb;
+        color: var(--ark-faint);
         margin-left: auto;
       }
     }
 
     .comment-body {
       font-size: 14px;
-      color: #555;
-      line-height: 1.6;
+      color: var(--ark-muted);
+      line-height: 1.7;
       padding-left: 36px;
     }
 
@@ -241,12 +247,12 @@ onMounted(() => {
         align-items: center;
         gap: 4px;
         font-size: 12px;
-        color: #999;
+        color: var(--ark-faint);
         cursor: pointer;
         transition: color 0.2s;
 
         &:hover {
-          color: var(--el-color-primary);
+          color: var(--ark-terracotta);
         }
 
         &.danger:hover {

@@ -1,0 +1,125 @@
+/* ============================================================
+   直到大地变成一颗酸橙 — 夏日公路·水彩黄昏主题
+   参考：官方创作征集活动横幅的暖赭石/沙丘/水彩笔触风格
+   ============================================================ */
+
+:root {
+  /* —— 核心色盘 —— */
+  --ark-warmcream:  #f5ead6;
+  --ark-sand:       #e8d4b8;
+  --ark-sand-light: #f2e6d4;
+  --ark-terracotta: #c45028;
+  --ark-coral:      #d06830;
+  --ark-coral-light:#e8a870;
+  --ark-sage:       #5a7a58;
+  --ark-sage-light: #8aaa88;
+  --ark-navy:       #1e3040;
+  --ark-navy-mid:   #2a4258;
+  --ark-navy-light: #3a5a70;
+  --ark-teal:       #3a8888;
+  --ark-teal-muted: #50908e;
+  --ark-brown:      #6a4a30;
+  --ark-brown-light:#8a6a48;
+  --ark-cream:      #faf3e6;
+  --ark-white:      #fdfaf2;
+  --ark-ink:        #2a2420;
+  --ark-muted:      #8a7a68;
+  --ark-faint:      #c8b8a4;
+
+  /* —— Element Plus 主色覆写 —— */
+  --el-color-primary: var(--ark-terracotta);
+  --el-color-primary-light-3: #d9886a;
+  --el-color-primary-light-5: #e8b09a;
+  --el-color-primary-light-7: #f0d4c4;
+  --el-color-primary-light-8: #f5e4d8;
+  --el-color-primary-light-9: #faf0e8;
+  --el-color-primary-dark-2:  #a03820;
+
+  --el-color-success: var(--ark-teal);
+  --el-color-success-light-3: #70b0ae;
+  --el-color-success-light-5: #a0ccc8;
+  --el-color-success-light-7: #c8e4e2;
+  --el-color-success-light-8: #d8eeec;
+  --el-color-success-light-9: #eaf6f4;
+
+  --el-color-warning: var(--ark-coral);
+  --el-color-warning-light-3: #e0986a;
+  --el-color-warning-light-5: #e8b490;
+  --el-color-warning-light-7: #f0d0b8;
+  --el-color-warning-light-8: #f5e0cc;
+  --el-color-warning-light-9: #faf0e8;
+
+  --el-border-radius-base: 8px;
+  --el-border-radius-round: 999px;
+  --el-text-color-primary: var(--ark-ink);
+  --el-fill-color-light: var(--ark-sand-light);
+}
+
+/* —— 全局基础 —— */
+*,*::before,*::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+  color: var(--ark-ink);
+  background: var(--ark-cream);
+  background-image:
+    radial-gradient(ellipse at 15% 10%, rgba(212,104,48,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 5%,  rgba(26,48,64,0.08) 0%,  transparent 45%),
+    radial-gradient(ellipse at 80% 85%, rgba(90,122,88,0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 10% 90%, rgba(232,168,112,0.10) 0%, transparent 45%),
+    linear-gradient(180deg, #fdf5e8 0%, #f2e4ce 40%, #ebe0d0 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app { min-height: 100vh; }
+
+/* —— 滚动条 —— */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--ark-sand-light); }
+::-webkit-scrollbar-thumb {
+  background: var(--ark-coral);
+  border-radius: 999px;
+  border: 2px solid var(--ark-cream);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--ark-terracotta); }
+
+/* —— Element Plus 润色 —— */
+.el-button { font-weight: 600; }
+
+.el-button--primary {
+  background: linear-gradient(135deg, var(--ark-terracotta) 0%, var(--ark-coral) 60%, var(--ark-coral-light) 100%);
+  border: none;
+  color: var(--ark-white);
+}
+.el-button--primary:hover,
+.el-button--primary:focus {
+  background: linear-gradient(135deg, var(--ark-terracotta) 0%, var(--ark-terracotta) 40%, var(--ark-coral) 100%);
+}
+
+.el-button--success {
+  background: linear-gradient(135deg, var(--ark-sage) 0%, var(--ark-teal-muted) 100%);
+  border: none;
+  color: var(--ark-white);
+}
+
+.el-button--warning {
+  background: linear-gradient(135deg, var(--ark-coral) 0%, var(--ark-coral-light) 100%);
+  border: none;
+  color: var(--ark-white);
+}
+
+.el-tag {
+  border-radius: 999px;
+}
+
+.el-card {
+  border: none;
+}
+
+/* —— 装饰性星点（手绘点缀）—— */
+@keyframes twinkle {
+  0%,100% { opacity: .6; }
+  50% { opacity: .2; }
+}

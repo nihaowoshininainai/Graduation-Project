@@ -34,8 +34,38 @@ const isSelf = computed(() => {
 
 <style lang="less" scoped>
 .user-page {
+  :deep(.el-tabs) {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+      0 8px 28px rgba(196, 80, 40, 0.06),
+      0 2px 8px rgba(42, 36, 32, 0.04);
+    border: 1px solid rgba(196, 80, 40, 0.10);
+  }
+
+  :deep(.el-tabs__header) {
+    background: var(--ark-white);
+    margin: 0;
+  }
+
+  :deep(.el-tabs__nav-wrap::after) {
+    background-color: rgba(196, 80, 40, 0.08);
+  }
+
+  :deep(.el-tabs__item.is-active) {
+    color: var(--ark-terracotta);
+    font-weight: 600;
+  }
+
+  :deep(.el-tabs__active-bar) {
+    background: var(--ark-terracotta);
+    height: 3px;
+    border-radius: 3px;
+  }
+
   :deep(.el-tabs__content) {
     padding: 20px;
+    background: var(--ark-white);
   }
 }
 </style>

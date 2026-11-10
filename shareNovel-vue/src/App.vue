@@ -54,8 +54,9 @@ onUnmounted(() => {
   box-shadow: none;
 
   &.scrolled {
-    background: #fff;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    background: rgba(245, 234, 214, 0.92);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 20px rgba(196, 80, 40, 0.10);
   }
 }
 
@@ -70,9 +71,10 @@ onUnmounted(() => {
 
 .app-footer {
   text-align: center;
-  padding: 20px 0;
-  color: #999;
+  padding: 22px 0;
+  color: var(--ark-muted);
   font-size: 13px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid rgba(196, 80, 40, 0.12);
+  letter-spacing: 1px;
 }
 </style>

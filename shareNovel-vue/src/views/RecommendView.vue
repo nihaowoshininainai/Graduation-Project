@@ -70,10 +70,11 @@ onMounted(async () => {
 }
 
 .page-title {
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 800;
   margin: 0 0 24px;
-  color: #303133;
+  color: var(--ark-terracotta);
+  letter-spacing: 1px;
 }
 
 .novel-grid {
@@ -84,19 +85,44 @@ onMounted(async () => {
 
 .novel-card {
   cursor: pointer;
-  transition: transform 0.2s;
-  border-radius: 12px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 14px;
+  background: var(--ark-white);
+  box-shadow:
+    0 4px 16px rgba(196, 80, 40, 0.06),
+    0 1px 3px rgba(42, 36, 32, 0.06);
+  border: 1px solid rgba(196, 80, 40, 0.08);
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--ark-terracotta), var(--ark-coral), var(--ark-coral-light));
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
 
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-5px);
+    box-shadow:
+      0 12px 32px rgba(196, 80, 40, 0.12),
+      0 4px 12px rgba(42, 36, 32, 0.06);
+    border-color: rgba(196, 80, 40, 0.15);
+
+    &::before { opacity: 1; }
   }
 
   .card-body {
     .card-title {
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       margin: 0 0 12px;
-      color: #303133;
+      color: var(--ark-ink);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -106,7 +132,7 @@ onMounted(async () => {
       height: 120px;
       overflow: hidden;
       font-size: 13px;
-      color: #666;
+      color: var(--ark-muted);
       line-height: 1.6;
     }
   }
@@ -114,11 +140,12 @@ onMounted(async () => {
   .card-footer {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     padding-top: 12px;
-    border-top: 1px solid #f0f0f0;
+    margin-top: 4px;
+    border-top: 1px dashed rgba(196, 80, 40, 0.12);
     font-size: 12px;
-    color: #999;
+    color: var(--ark-faint);
   }
 }
 </style>

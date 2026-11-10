@@ -81,15 +81,18 @@ const handleLogin = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 70vh;
+  min-height: 72vh;
 }
 
 .login-card {
   display: flex;
   width: 700px;
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 16px 48px rgba(196, 80, 40, 0.12),
+    0 4px 16px rgba(42, 36, 32, 0.06);
+  border: 1px solid rgba(196, 80, 40, 0.10);
 
   .login-banner {
     width: 45%;
@@ -101,28 +104,32 @@ const handleLogin = () => {
   .login-form-wrap {
     flex: 1;
     padding: 40px 32px;
-    background: #fff;
+    background: var(--ark-white);
 
     .form-title {
       text-align: center;
       margin: 0 0 24px;
-      font-size: 22px;
-      color: #303133;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--ark-terracotta);
+      letter-spacing: 1px;
     }
 
     .login-btn {
       width: 100%;
+      margin-top: 4px;
     }
 
     .form-footer {
       text-align: center;
       margin-top: 16px;
       font-size: 13px;
-      color: #999;
+      color: var(--ark-muted);
 
       a {
-        color: var(--el-color-primary);
+        color: var(--ark-terracotta);
         text-decoration: none;
+        font-weight: 600;
       }
     }
   }
