@@ -1,1 +1,24 @@
-novel-0.0.1-SNAPSHOT.jar
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+bun.lock
+
+# Build outputs
+dist/
+target/
+*.jar
+
+# Generated files
+shareNovel-vue/auto-imports.d.ts
+shareNovel-vue/components.d.ts
+shareNovelManager-vue/auto-imports.d.ts
+shareNovelManager-vue/components.d.ts
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
