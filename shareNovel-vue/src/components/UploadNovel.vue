@@ -12,9 +12,7 @@
     <el-input v-model="title" placeholder="请输入小说标题" size="large" class="title-input" />
 
     <div class="editor-wrapper">
-      <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="mode" />
-      <Editor style="height: 500px; overflow-y: hidden;" v-model="valueHtml" :defaultConfig="editorConfig" :mode="mode"
-        @onCreated="handleCreated" />
+      <TiptapEditor v-model="valueHtml" placeholder="请输入小说内容..." />
     </div>
 
     <el-drawer v-model="drawer" title="选择标签" size="300px">
@@ -31,24 +29,19 @@
 </template>
 
 <script setup lang="ts">
-import '@wangeditor/editor/dist/css/style.css'
-import { onBeforeUnmount, ref, shallowRef, watch } from 'vue'
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import { ref, watch } from 'vue'
+import TiptapEditor from '@/components/TiptapEditor.vue'
 import type { Label, Novel, NovelLabel, Result, User } from '@/baseType'
 import { getLabels } from '@/request/label'
 import { uploadUserNovel } from '@/request/novel'
 import { uploadNovelLabels } from '@/request/novelLabel'
 import { getStoredUser } from '@/request'
 
-const mode = 'default'
-const editorRef = shallowRef()
 const drawer = ref(false)
 const title = ref('')
 const valueHtml = ref('')
 const allLabels = ref<Label[]>([])
 const selectedLabels = ref<Label[]>([])
-const toolbarConfig = {}
-const editorConfig = { placeholder: '请输入小说内容...' }
 
 const savedNovel = localStorage.getItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL)
 if (savedNovel) {
@@ -67,16 +60,6 @@ if (savedNovel) {
   } catch {
     localStorage.removeItem(import.meta.env.VITE_LOCALSTORAGE_NOVEL)
   }
-}
-
-onBeforeUnmount(() => {
-  const editor = editorRef.value
-  if (editor == null) return
-  editor.destroy()
-})
-
-const handleCreated = (editor: any) => {
-  editorRef.value = editor
 }
 
 watch(drawer, async (val) => {
